@@ -1,22 +1,14 @@
-import { supabase } from "../../services/supabase";
+import { prisma } from "../../services/db";
 
 export async function getCustomerReviews() {
-  const { data, error } = await supabase
-    .from("reviews")
-    .select(
-      `
-      id,
-      rating,
-      comment,
-      verified,
-      users ( name )
-    `,
-    )
-    .eq("verified", true)
-    .order("created_at", { ascending: false })
-    .limit(3);
-
-  if (error) throw error;
-
-  return data;
+  return prisma.review.findMany({
+    where: { rating: { gte: 4 } },
+    include: {
+      user: {
+        select: { name: true },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+  });
 }

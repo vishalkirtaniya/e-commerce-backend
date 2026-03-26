@@ -1,50 +1,42 @@
-import { supabase } from "../../services/supabase"
+import { prisma } from "../../services/db";
 
 export async function getAllProducts() {
-
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-
-  if (error) throw error
-
-  return data
+  return prisma.product.findMany();
 }
 
 export async function getProductById(id: string) {
+  return prisma.product.findUnique({
+    where: { id },
+  });
+}
 
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .single()
-
-  if (error) throw error
-
-  return data
+export async function getProductBySlug(slug: string) {
+  return prisma.product.findUnique({
+    where: { slug },
+  });
 }
 
 export async function getProductsByCategory(category: string) {
-
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("category", category)
-
-  if (error) throw error
-
-  return data
+  return prisma.product.findMany({
+    where: { category },
+  });
 }
 
 export async function createProduct(product: any) {
+  return prisma.product.create({
+    data: product,
+  });
+}
 
-  const { data, error } = await supabase
-    .from("products")
-    .insert(product)
-    .select()
-    .single()
+export async function updateProduct(id: string, product: any) {
+  return prisma.product.update({
+    where: { id },
+    data: product,
+  });
+}
 
-  if (error) throw error
-
-  return data
+export async function deleteProduct(id: string) {
+  return prisma.product.delete({
+    where: { id },
+  });
 }

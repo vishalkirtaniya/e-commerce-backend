@@ -1,63 +1,63 @@
-import dotenv from "dotenv";
+import Fastify from 'fastify';
+import dotenv from 'dotenv';
+import { registerPlugins } from './plugins';
+import { authRoutes } from './modules/auth/auth.routes';
+import redis from './services/redis';
+import pool from './services/db';
+
 dotenv.config();
 
-import Fastify from "fastify";
-import authRoutes from "./modules/auth/auth.routes";
-import { authMiddleware } from "./middleware/auth";
-import productRoutes from "./modules/products/products.routes";
-import cartRoutes from "./modules/cart/cart.routes";
-import newArrivalsRoutes from "./modules/newArrivals/newArrivals.routes";
-import topSellingRoutes from "./modules/topSelling/topSelling.routes";
-import customerReviewsRoutes from "./modules/customerReviews/customerReviews.routes";
-import { redis } from "./services/redis";
-
-const app = Fastify({
-  logger: true,
+const fastify = Fastify({
+  logger: {
+    level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
+    transport: process.env.NODE_ENV !== 'production'
+      ? { target: 'pino-pretty', options: { colorize: true } }
+      : undefined,
+  },
 });
 
-/* Health Check */
-app.get("/", async () => {
-  return { status: "API running" };
-});
+async function bootstrap() {
+  // 1. Register plugins (cors, etc.)
+  await registerPlugins(fastify);
 
-/* Redis Test */
-app.get("/redis-test", async () => {
-  await redis.set("hello", "world");
-  const value = await redis.get("hello");
-  return { value };
-});
+  // 2. Register all route modules under /api
+  fastify.register(authRoutes, { prefix: '/api/auth' });
 
-/* Protected profile example */
-app.get("/profile", { preHandler: authMiddleware }, async (req: any) => {
-  return {
-    message: "Protected route",
-    userId: req.userId,
-  };
-});
+  // TODO: register remaining modules as they're built:
+  // fastify.register(productRoutes,        { prefix: '/api/products' });
+  // fastify.register(newArrivalsRoutes,     { prefix: '/api/new-arrivals' });
+  // fastify.register(topSellingRoutes,      { prefix: '/api/top-selling' });
+  // fastify.register(customerReviewRoutes,  { prefix: '/api/reviews' });
+  // fastify.register(cartRoutes,            { prefix: '/api/cart' });
+  // fastify.register(orderRoutes,           { prefix: '/api/orders' });
+  // fastify.register(paymentRoutes,         { prefix: '/api/payments' });
 
-/* Public Routes */
-app.register(authRoutes);
-app.register(productRoutes);
-app.register(newArrivalsRoutes);
-app.register(topSellingRoutes);
-app.register(customerReviewsRoutes);
+  // 3. Health check
+  fastify.get('/health', async () => ({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  }));
 
-/* Protected Routes */
-app.register(async (protectedApp) => {
-  protectedApp.addHook("preHandler", authMiddleware);
-  protectedApp.register(cartRoutes);
-});
+  // 4. Start server
+  const port = Number(process.env.PORT) || 3000;
+  await fastify.listen({ port, host: '0.0.0.0' });
+  console.log(`🚀 Server running at http://localhost:${port}`);
+}
 
-const start = async () => {
-  try {
-    await app.listen({
-      port: Number(process.env.PORT),
-      host: "0.0.0.0",
-    });
-  } catch (err) {
-    app.log.error(err);
-    process.exit(1);
-  }
+// Graceful shutdown
+const shutdown = async () => {
+  console.log('\n🔄 Shutting down gracefully...');
+  await fastify.close();
+  await pool.end();
+  await redis.quit();
+  console.log('✅ All connections closed');
+  process.exit(0);
 };
 
-start();
+process.on('SIGINT',  shutdown);
+process.on('SIGTERM', shutdown);
+
+bootstrap().catch((err) => {
+  console.error('❌ Failed to start server:', err);
+  process.exit(1);
+});
