@@ -1,31 +1,44 @@
-import { FastifyInstance } from "fastify"
-
+import { FastifyInstance } from "fastify";
+import { authenticate } from "../../middleware/auth";
 import {
-  addToCart,
-  getCart,
-  deleteCartItem
-} from "./cart.controller"
+  getCartHandler,
+  addToCartHandler,
+  updateCartItemHandler,
+  removeCartItemHandler,
+  clearCartHandler,
+  applyPromoHandler,
+  removePromoHandler,
+} from "./cart.controller";
 
-import { authMiddleware } from "../../middleware/auth"
+export async function cartRoutes(fastify: FastifyInstance) {
+  const auth = { preHandler: [authenticate] };
 
-export default async function cartRoutes(app: FastifyInstance) {
+  // GET    /api/cart
+  fastify.get("/", auth, getCartHandler);
 
-  app.post(
-    "/cart/add",
-    { preHandler: authMiddleware },
-    addToCart
-  )
+  // POST   /api/cart
+  fastify.post("/", auth, addToCartHandler);
 
-  app.get(
-    "/cart",
-    { preHandler: authMiddleware },
-    getCart
-  )
+  // DELETE /api/cart
+  fastify.delete("/", auth, clearCartHandler);
 
-  app.delete(
-    "/cart/item/:id",
-    { preHandler: authMiddleware },
-    deleteCartItem
-  )
+  // PATCH  /api/cart/:itemId
+  fastify.patch<{ Params: { itemId: string } }>(
+    "/:itemId",
+    auth,
+    updateCartItemHandler,
+  );
 
+  // DELETE /api/cart/:itemId
+  fastify.delete<{ Params: { itemId: string } }>(
+    "/:itemId",
+    auth,
+    removeCartItemHandler,
+  );
+
+  // POST   /api/cart/promo
+  fastify.post("/promo", auth, applyPromoHandler);
+
+  // DELETE /api/cart/promo
+  fastify.delete("/promo", auth, removePromoHandler);
 }
