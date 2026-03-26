@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { registerPlugins } from "./plugins/index";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { productRoutes } from "./modules/products/products.routes";
+import { newArrivalsRoutes } from "./modules/newArrivals/newArrivals.routes";
 import redis from "./services/redis";
 import pool from "./services/db";
 
@@ -25,9 +26,9 @@ async function bootstrap() {
   // 2. Register all route modules under /api
   fastify.register(authRoutes, { prefix: "/api/auth" });
   fastify.register(productRoutes, { prefix: "/api/products" });
+  fastify.register(newArrivalsRoutes,     { prefix: '/api/new-arrivals' });
 
   // TODO: register remaining modules as they're built:
-  // fastify.register(newArrivalsRoutes,     { prefix: '/api/new-arrivals' });
   // fastify.register(topSellingRoutes,      { prefix: '/api/top-selling' });
   // fastify.register(customerReviewRoutes,  { prefix: '/api/reviews' });
   // fastify.register(cartRoutes,            { prefix: '/api/cart' });
