@@ -5,6 +5,7 @@ import { authRoutes } from "./modules/auth/auth.routes";
 import { productRoutes } from "./modules/products/products.routes";
 import { newArrivalsRoutes } from "./modules/newArrivals/newArrivals.routes";
 import { topSellingRoutes } from "./modules/topSelling/topSelling.routes";
+import { customerReviewRoutes } from "./modules/customerReviews/customerReviews.routes";
 import redis from "./services/redis";
 import pool from "./services/db";
 
@@ -29,9 +30,9 @@ async function bootstrap() {
   fastify.register(productRoutes, { prefix: "/api/products" });
   fastify.register(newArrivalsRoutes, { prefix: "/api/new-arrivals" });
   fastify.register(topSellingRoutes, { prefix: "/api/top-selling" });
+  fastify.register(customerReviewRoutes, { prefix: "/api/reviews" });
 
   // TODO: register remaining modules as they're built:
-  // fastify.register(customerReviewRoutes,  { prefix: '/api/reviews' });
   // fastify.register(cartRoutes,            { prefix: '/api/cart' });
   // fastify.register(orderRoutes,           { prefix: '/api/orders' });
   // fastify.register(paymentRoutes,         { prefix: '/api/payments' });
