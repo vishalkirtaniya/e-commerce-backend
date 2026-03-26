@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import dotenv from 'dotenv';
-import { registerPlugins } from './plugins';
+import { registerPlugins } from './plugins/index';
 import { authRoutes } from './modules/auth/auth.routes';
 import redis from './services/redis';
 import pool from './services/db';
