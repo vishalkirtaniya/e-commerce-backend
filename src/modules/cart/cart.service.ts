@@ -1,102 +1,59 @@
-import { supabase } from "../../services/supabase"
+import { prisma } from "../../services/db";
 
 export async function getUserCart(userId: string) {
-
-  const { data, error } = await supabase
-    .from("carts")
-    .select("*")
-    .eq("user_id", userId)
-    .single()
-
-  if (error) return null
-
-  return data
-}
-
-export async function createCart(userId: string) {
-
-  const { data, error } = await supabase
-    .from("carts")
-    .insert({ user_id: userId })
-    .select()
-    .single()
-
-  if (error) throw error
-
-  return data
+  return prisma.cartItem.findMany({
+    where: { userId },
+    include: { product: true },
+  });
 }
 
 export async function addCartItem(
-  cartId: string,
+  userId: string,
   productId: string,
-  quantity: number
+  quantity: number,
 ) {
-
-  /* Check if item already exists */
-
-  const { data: existingItem } = await supabase
-    .from("cart_items")
-    .select("*")
-    .eq("cart_id", cartId)
-    .eq("product_id", productId)
-    .single()
-
-  /* If exists → update quantity */
+  const existingItem = await prisma.cartItem.findUnique({
+    where: {
+      userId_productId: {
+        userId,
+        productId,
+      },
+    },
+  });
 
   if (existingItem) {
-
-    const { data, error } = await supabase
-      .from("cart_items")
-      .update({
-        quantity: existingItem.quantity + quantity
-      })
-      .eq("id", existingItem.id)
-      .select()
-      .single()
-
-    if (error) throw error
-
-    return data
+    return prisma.cartItem.update({
+      where: { id: existingItem.id },
+      data: {
+        quantity: existingItem.quantity + quantity,
+      },
+    });
   }
 
-  /* Otherwise create new item */
-
-  const { data, error } = await supabase
-    .from("cart_items")
-    .insert({
-      cart_id: cartId,
-      product_id: productId,
-      quantity
-    })
-    .select()
-    .single()
-
-  if (error) throw error
-
-  return data
+  return prisma.cartItem.create({
+    data: {
+      userId,
+      productId,
+      quantity,
+    },
+  });
 }
 
-export async function getCartItems(cartId: string) {
-
-  const { data, error } = await supabase
-    .from("cart_items")
-    .select(`
-      *,
-      products(*)
-    `)
-    .eq("cart_id", cartId)
-
-  if (error) throw error
-
-  return data
+export async function updateCartItemQuantity(itemId: string, quantity: number) {
+  return prisma.cartItem.update({
+    where: { id: itemId },
+    data: { quantity },
+  });
 }
 
 export async function removeCartItem(itemId: string) {
+  return prisma.cartItem.delete({
+    where: { id: itemId },
+  });
+}
 
-  const { error } = await supabase
-    .from("cart_items")
-    .delete()
-    .eq("id", itemId)
-
-  if (error) throw error
+export async function clearUserCart(userId: string) {
+  return prisma.cartItem.deleteMany({
+    where: { userId },
+  });
 }

@@ -1,90 +1,83 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { createUser, findUserByEmail } from "./auth.service"
-import { hashPassword, comparePassword } from "../../utils/hash"
-import { signToken } from "../../utils/jwt"
-import { redis } from "../../services/redis"
-import { randomUUID } from "crypto"
-import { verifyToken } from "../../utils/jwt"
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { SignupSchema, SigninSchema, RefreshSchema } from './auth.schema';
+import * as AuthService from './auth.service';
 
-export async function signup(req: FastifyRequest, reply: FastifyReply) {
-  const { name, email, password } = req.body as any
-
-  const existing = await findUserByEmail(email)
-
-  if (existing) {
-    return reply.status(400).send({
-      error: "User already exists"
-    })
+// ── POST /api/auth/signup ─────────────────────────────────────
+export async function signupHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const parsed = SignupSchema.safeParse(request.body);
+  if (!parsed.success) {
+    return reply.status(400).send({ error: parsed.error.flatten().fieldErrors });
   }
 
-  const password_hash = await hashPassword(password)
-
-  const user = await createUser({
-    name,
-    email,
-    password_hash
-  })
-
-  return {
-    message: "User created",
-    user
+  try {
+    const result = await AuthService.signup(parsed.data);
+    return reply.status(201).send(result);
+  } catch (err: any) {
+    return reply.status(err.statusCode ?? 500).send({ error: err.message ?? 'Internal server error' });
   }
 }
 
-export async function login(req: FastifyRequest, reply: FastifyReply) {
-  const { email, password } = req.body as any
-
-  const user = await findUserByEmail(email)
-
-  if (!user) {
-    return reply.status(401).send({
-      error: "Invalid credentials"
-    })
+// ── POST /api/auth/signin ─────────────────────────────────────
+export async function signinHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const parsed = SigninSchema.safeParse(request.body);
+  if (!parsed.success) {
+    return reply.status(400).send({ error: parsed.error.flatten().fieldErrors });
   }
 
-  const valid = await comparePassword(password, user.password_hash)
-
-  if (!valid) {
-    return reply.status(401).send({
-      error: "Invalid credentials"
-    })
-  }
-
-  const sessionId = randomUUID()
-
-  const token = signToken({
-    userId: user.id,
-    sessionId
-  })
-
-  await redis.set(
-    `session:${sessionId}`,
-    JSON.stringify({
-      userId: user.id
-    }),
-    "EX",
-    60 * 60 * 24
-  )
-
-  return {
-    token
+  try {
+    const result = await AuthService.signin(parsed.data);
+    return reply.status(200).send(result);
+  } catch (err: any) {
+    return reply.status(err.statusCode ?? 500).send({ error: err.message ?? 'Internal server error' });
   }
 }
 
-export async function logout(req: any, reply: any) {
-
-  const authHeader = req.headers.authorization
-
-  if (!authHeader) {
-    return reply.status(401).send({ error: "Unauthorized" })
+// ── POST /api/auth/refresh ────────────────────────────────────
+export async function refreshHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const parsed = RefreshSchema.safeParse(request.body);
+  if (!parsed.success) {
+    return reply.status(400).send({ error: parsed.error.flatten().fieldErrors });
   }
 
-  const token = authHeader.split(" ")[1]
+  try {
+    const result = await AuthService.refreshTokens(parsed.data.refresh_token);
+    return reply.status(200).send(result);
+  } catch (err: any) {
+    return reply.status(err.statusCode ?? 500).send({ error: err.message ?? 'Internal server error' });
+  }
+}
 
-  const payload: any = verifyToken(token)
+// ── POST /api/auth/logout ─────────────────────────────────────
+export async function logoutHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const user  = (request as any).user;
+  const token = request.headers.authorization!.slice(7);
 
-  await redis.del(`session:${payload.sessionId}`)
+  try {
+    const result = await AuthService.logout(user.userId, token);
+    return reply.status(200).send(result);
+  } catch (err: any) {
+    return reply.status(500).send({ error: 'Logout failed' });
+  }
+}
 
-  return { message: "Logged out successfully" }
-
+// ── GET /api/auth/me ──────────────────────────────────────────
+export async function meHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  // user is already attached by authenticate middleware
+  const user = (request as any).user;
+  return reply.status(200).send({ user });
 }
