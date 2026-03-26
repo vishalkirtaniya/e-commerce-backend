@@ -1,18 +1,20 @@
-import Fastify from 'fastify';
-import dotenv from 'dotenv';
-import { registerPlugins } from './plugins/index';
-import { authRoutes } from './modules/auth/auth.routes';
-import redis from './services/redis';
-import pool from './services/db';
+import Fastify from "fastify";
+import dotenv from "dotenv";
+import { registerPlugins } from "./plugins/index";
+import { authRoutes } from "./modules/auth/auth.routes";
+import { productRoutes } from "./modules/products/products.routes";
+import redis from "./services/redis";
+import pool from "./services/db";
 
 dotenv.config();
 
 const fastify = Fastify({
   logger: {
-    level: process.env.NODE_ENV === 'production' ? 'warn' : 'info',
-    transport: process.env.NODE_ENV !== 'production'
-      ? { target: 'pino-pretty', options: { colorize: true } }
-      : undefined,
+    level: process.env.NODE_ENV === "production" ? "warn" : "info",
+    transport:
+      process.env.NODE_ENV !== "production"
+        ? { target: "pino-pretty", options: { colorize: true } }
+        : undefined,
   },
 });
 
@@ -21,10 +23,10 @@ async function bootstrap() {
   await registerPlugins(fastify);
 
   // 2. Register all route modules under /api
-  fastify.register(authRoutes, { prefix: '/api/auth' });
+  fastify.register(authRoutes, { prefix: "/api/auth" });
+  fastify.register(productRoutes, { prefix: "/api/products" });
 
   // TODO: register remaining modules as they're built:
-  // fastify.register(productRoutes,        { prefix: '/api/products' });
   // fastify.register(newArrivalsRoutes,     { prefix: '/api/new-arrivals' });
   // fastify.register(topSellingRoutes,      { prefix: '/api/top-selling' });
   // fastify.register(customerReviewRoutes,  { prefix: '/api/reviews' });
@@ -33,31 +35,31 @@ async function bootstrap() {
   // fastify.register(paymentRoutes,         { prefix: '/api/payments' });
 
   // 3. Health check
-  fastify.get('/health', async () => ({
-    status: 'ok',
+  fastify.get("/health", async () => ({
+    status: "ok",
     timestamp: new Date().toISOString(),
   }));
 
   // 4. Start server
   const port = Number(process.env.PORT) || 3000;
-  await fastify.listen({ port, host: '0.0.0.0' });
+  await fastify.listen({ port, host: "0.0.0.0" });
   console.log(`🚀 Server running at http://localhost:${port}`);
 }
 
 // Graceful shutdown
 const shutdown = async () => {
-  console.log('\n🔄 Shutting down gracefully...');
+  console.log("\n🔄 Shutting down gracefully...");
   await fastify.close();
   await pool.end();
   await redis.quit();
-  console.log('✅ All connections closed');
+  console.log("✅ All connections closed");
   process.exit(0);
 };
 
-process.on('SIGINT',  shutdown);
-process.on('SIGTERM', shutdown);
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
 bootstrap().catch((err) => {
-  console.error('❌ Failed to start server:', err);
+  console.error("❌ Failed to start server:", err);
   process.exit(1);
 });

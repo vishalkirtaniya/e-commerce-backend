@@ -1,22 +1,23 @@
-import { z } from "zod"
+import { z } from "zod";
 
-export const createProductSchema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  description: z.string().optional(),
-  price: z.number().positive(),
-  originalPrice: z.number().optional(),
-  image: z.string().url(),
-  imageUrl: z.string().url().optional(),
-  category: z.string().optional(),
-  stock: z.number().int().min(0).default(0),
-  rating: z.number().min(0).max(5).default(0),
-  numReviews: z.number().int().min(0).default(0),
-  discount: z.number().int().min(0).max(100).optional()
-})
+// ── Query params for GET /api/products ───────────────────────
+export const ProductsQuerySchema = z.object({
+  // Filters
+  category: z.string().optional(), // category slug e.g. "led-gifts"
+  occasion: z.string().optional(), // occasion slug e.g. "birthday"
+  material: z.enum(["Acrylic", "MDF", "Forex", "Wooden", "Mixed"]).optional(),
+  min_price: z.coerce.number().min(0).optional(),
+  max_price: z.coerce.number().min(0).optional(),
 
-export const updateProductSchema = createProductSchema.partial()
+  // Sorting
+  sort_by: z
+    .enum(["price_asc", "price_desc", "rating", "newest"])
+    .optional()
+    .default("newest"),
 
-export const productIdSchema = z.object({
-  id: z.string().uuid()
-})
+  // Pagination
+  page: z.coerce.number().int().min(1).optional().default(1),
+  limit: z.coerce.number().int().min(1).max(50).optional().default(12),
+});
+
+export type ProductsQuery = z.infer<typeof ProductsQuerySchema>;
