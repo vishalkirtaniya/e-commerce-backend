@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify"
-import { topSelling } from "./topSelling.controller"
-import { topSellingSchema } from "./topSelling.schema"
+import { FastifyInstance } from "fastify";
+import { getTopSellingHandler } from "./topSelling.controller";
 
-export default async function topSellingRoutes(app: FastifyInstance) {
-  app.get("/products/top-selling", { ...topSellingSchema }, topSelling)
+export async function topSellingRoutes(fastify: FastifyInstance) {
+  // GET /api/top-selling?limit=8
+  fastify.get("/", getTopSellingHandler);
 }
