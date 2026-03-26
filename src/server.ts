@@ -3,6 +3,12 @@ import dotenv from "dotenv";
 import { registerPlugins } from "./plugins/index";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { productRoutes } from "./modules/products/products.routes";
+import { newArrivalsRoutes } from "./modules/newArrivals/newArrivals.routes";
+import { topSellingRoutes } from "./modules/topSelling/topSelling.routes";
+import { customerReviewRoutes } from "./modules/customerReviews/customerReviews.routes";
+import { cartRoutes } from "./modules/cart/cart.routes";
+import { orderRoutes } from "./modules/orders/order.routes";
+import { paymentRoutes } from "./modules/payments/payments.routes";
 import redis from "./services/redis";
 import pool from "./services/db";
 
@@ -25,14 +31,12 @@ async function bootstrap() {
   // 2. Register all route modules under /api
   fastify.register(authRoutes, { prefix: "/api/auth" });
   fastify.register(productRoutes, { prefix: "/api/products" });
-
-  // TODO: register remaining modules as they're built:
-  // fastify.register(newArrivalsRoutes,     { prefix: '/api/new-arrivals' });
-  // fastify.register(topSellingRoutes,      { prefix: '/api/top-selling' });
-  // fastify.register(customerReviewRoutes,  { prefix: '/api/reviews' });
-  // fastify.register(cartRoutes,            { prefix: '/api/cart' });
-  // fastify.register(orderRoutes,           { prefix: '/api/orders' });
-  // fastify.register(paymentRoutes,         { prefix: '/api/payments' });
+  fastify.register(newArrivalsRoutes, { prefix: "/api/new-arrivals" });
+  fastify.register(topSellingRoutes, { prefix: "/api/top-selling" });
+  fastify.register(customerReviewRoutes, { prefix: "/api/reviews" });
+  fastify.register(cartRoutes, { prefix: "/api/cart" });
+  fastify.register(orderRoutes, { prefix: "/api/orders" });
+  fastify.register(paymentRoutes, { prefix: "/api/payments" });
 
   // 3. Health check
   fastify.get("/health", async () => ({
