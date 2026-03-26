@@ -1,20 +1,17 @@
-import { FastifyInstance } from "fastify"
-
+import { FastifyInstance } from 'fastify';
 import {
-  getProducts,
-  getProduct,
-  getProductsCategory,
-  addProduct
-} from "./products.controller"
+  getProductsHandler,
+  getFiltersHandler,
+  getProductBySlugHandler,
+} from './products.controller';
 
-export default async function productRoutes(app: FastifyInstance) {
+export async function productRoutes(fastify: FastifyInstance) {
+  // GET /api/products?category=led-gifts&occasion=birthday&material=Acrylic&min_price=200&max_price=800&sort_by=price_asc&page=1&limit=12
+  fastify.get('/', getProductsHandler);
 
-  app.get("/products", getProducts)
+  // GET /api/products/filters  ← must be before /:slug
+  fastify.get('/filters', getFiltersHandler);
 
-  app.get("/products/:id", getProduct)
-
-  app.get("/products/category/:category", getProductsCategory)
-
-  app.post("/products", addProduct)
-
+  // GET /api/products/led-spotify-stc-01
+  fastify.get('/:slug', getProductBySlugHandler);
 }

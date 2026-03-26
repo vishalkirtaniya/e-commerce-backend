@@ -1,59 +1,56 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { redis } from "../../services/redis"
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { ProductsQuerySchema } from './products.schema';
+import * as ProductsService from './products.service';
 
-import {
-  getAllProducts,
-  getProductById,
-  getProductsByCategory,
-  createProduct
-} from "./products.service"
-
-export async function getProducts(req: FastifyRequest) {
-
-  const cache = await redis.get("products")
-
-  if (cache) {
-    return JSON.parse(cache)
+// ── GET /api/products ─────────────────────────────────────────
+export async function getProductsHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const parsed = ProductsQuerySchema.safeParse(request.query);
+  if (!parsed.success) {
+    return reply.status(400).send({ error: parsed.error.flatten().fieldErrors });
   }
 
-  const products = await getAllProducts()
-
-  await redis.set("products", JSON.stringify(products), "EX", 60)
-
-  return products
-}
-
-export async function getProduct(req: FastifyRequest) {
-
-  const { id } = req.params as any
-
-  const cache = await redis.get(`product:${id}`)
-
-  if (cache) {
-    return JSON.parse(cache)
+  try {
+    const result = await ProductsService.getProducts(parsed.data);
+    return reply.status(200).send(result);
+  } catch (err: any) {
+    request.log.error(err);
+    return reply.status(500).send({ error: 'Failed to fetch products' });
   }
-
-  const product = await getProductById(id)
-
-  await redis.set(`product:${id}`, JSON.stringify(product), "EX", 60)
-
-  return product
 }
 
-export async function getProductsCategory(req: FastifyRequest) {
-
-  const { category } = req.params as any
-
-  const products = await getProductsByCategory(category)
-
-  return products
+// ── GET /api/products/filters ─────────────────────────────────
+// NOTE: must be registered BEFORE /:slug so it doesn't get swallowed
+export async function getFiltersHandler(
+  _request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const result = await ProductsService.getFilterOptions();
+    return reply.status(200).send(result);
+  } catch (err: any) {
+    _request.log.error(err);
+    return reply.status(500).send({ error: 'Failed to fetch filter options' });
+  }
 }
 
-export async function addProduct(req: FastifyRequest, reply: FastifyReply) {
+// ── GET /api/products/:slug ───────────────────────────────────
+export async function getProductBySlugHandler(
+  request: FastifyRequest<{ Params: { slug: string } }>,
+  reply: FastifyReply
+) {
+  const { slug } = request.params;
 
-  const product = req.body
-
-  const newProduct = await createProduct(product)
-
-  return newProduct
+  try {
+    const product = await ProductsService.getProductBySlug(slug);
+    if (!product) {
+      return reply.status(404).send({ error: `Product '${slug}' not found` });
+    }
+    return reply.status(200).send(product);
+  } catch (err: any) {
+    request.log.error(err);
+    return reply.status(500).send({ error: 'Failed to fetch product' });
+  }
 }
