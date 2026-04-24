@@ -1,3 +1,7 @@
+ignoredBuiltDependencies:
+  - sharp
+  - ws
+
 onlyBuiltDependencies:
-  - "@prisma/engines"
-  - "prisma"
+  - '@prisma/engines'
+  - prisma

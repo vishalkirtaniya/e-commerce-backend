@@ -5,6 +5,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  toggleSoldOut
 } from './products.service.js'
 import { auditLog } from '../shared/auditLog.js'
 import {
@@ -129,6 +130,30 @@ export async function deleteProductHandler(
     })
 
     return reply.code(204).send()
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unexpected error'
+    return reply.code(500).send({ error: message })
+  }
+}
+
+export async function toggleSoldOutHandler(
+  request: FastifyRequest<{ Params: ProductParams; Body: { is_sold_out: boolean } }>,
+  reply: FastifyReply
+) {
+  try {
+    const { id } = request.params
+    const { is_sold_out } = request.body
+    const data = await toggleSoldOut(id, is_sold_out)
+
+    auditLog({
+      adminUserId: request.admin.adminUserId,
+      action: is_sold_out ? 'MARK_SOLD_OUT' : 'MARK_IN_STOCK',
+      entity: 'products',
+      entityId: id,
+      ipAddress: request.ip,
+    })
+
+    return reply.send(data)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unexpected error'
     return reply.code(500).send({ error: message })

@@ -17,7 +17,7 @@ import { customerReviewRoutes } from "./modules/customerReviews/customerReviews.
 import { cartRoutes } from "./modules/cart/cart.routes";
 import { orderRoutes } from "./modules/orders/order.routes";
 import { paymentRoutes } from "./modules/payments/payments.routes";
-import adminRoutes from './modules/admin/admin.routes.js'
+import adminRoutes from "./modules/admin/admin.routes";
 import redis from "./services/redis";
 import pool from "./services/db";
 
@@ -52,6 +52,10 @@ async function bootstrap() {
   const port = Number(process.env.PORT) || 5000;
   await fastify.listen({ port, host: "0.0.0.0" });
   console.log(`🚀 Server running at http://localhost:${port}`);
+
+  fastify.ready(() => {
+    console.log(fastify.printRoutes())
+  })
 }
 
 const shutdown = async () => {

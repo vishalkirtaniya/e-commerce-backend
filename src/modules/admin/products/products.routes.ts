@@ -7,6 +7,7 @@ import {
   createProductHandler,
   updateProductHandler,
   deleteProductHandler,
+  toggleSoldOutHandler
 } from './products.controller.js'
 import type { ProductParams, CreateProductBody, UpdateProductBody } from './products.schema.js'
 
@@ -49,4 +50,10 @@ export default async function productRoutes(fastify: FastifyInstance): Promise<v
   fastify.delete<ProductParamsRoute>('/products/:id', {
     preHandler: [verifyAdminJWT, requirePermission('products:delete')],
   }, deleteProductHandler)
+
+  fastify.patch<{ Params: ProductParams; Body: { is_sold_out: boolean } }>(
+  '/products/:id/sold-out',
+  { preHandler: [verifyAdminJWT, requirePermission('products:write')] },
+  toggleSoldOutHandler
+)
 }
