@@ -1,5 +1,13 @@
 import Fastify from "fastify";
+import dns from "dns";
 import dotenv from "dotenv";
+import path from "path";
+
+// Load .env immediately — before any other module reads process.env
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+dns.setDefaultResultOrder("ipv4first");
+
 import { registerPlugins } from "./plugins/index";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { productRoutes } from "./modules/products/products.routes";
@@ -9,10 +17,9 @@ import { customerReviewRoutes } from "./modules/customerReviews/customerReviews.
 import { cartRoutes } from "./modules/cart/cart.routes";
 import { orderRoutes } from "./modules/orders/order.routes";
 import { paymentRoutes } from "./modules/payments/payments.routes";
+import adminRoutes from "./modules/admin/admin.routes";
 import redis from "./services/redis";
 import pool from "./services/db";
-
-dotenv.config();
 
 const fastify = Fastify({
   logger: {
@@ -25,10 +32,8 @@ const fastify = Fastify({
 });
 
 async function bootstrap() {
-  // 1. Register plugins (cors, etc.)
   await registerPlugins(fastify);
 
-  // 2. Register all route modules under /api
   fastify.register(authRoutes, { prefix: "/api/auth" });
   fastify.register(productRoutes, { prefix: "/api/products" });
   fastify.register(newArrivalsRoutes, { prefix: "/api/new-arrivals" });
@@ -37,20 +42,22 @@ async function bootstrap() {
   fastify.register(cartRoutes, { prefix: "/api/cart" });
   fastify.register(orderRoutes, { prefix: "/api/orders" });
   fastify.register(paymentRoutes, { prefix: "/api/payments" });
+  fastify.register(adminRoutes, { prefix: "/admin"})
 
-  // 3. Health check
   fastify.get("/health", async () => ({
     status: "ok",
     timestamp: new Date().toISOString(),
   }));
 
-  // 4. Start server
-  const port = Number(process.env.PORT) || 3000;
+  const port = Number(process.env.PORT) || 5000;
   await fastify.listen({ port, host: "0.0.0.0" });
   console.log(`🚀 Server running at http://localhost:${port}`);
+
+  fastify.ready(() => {
+    console.log(fastify.printRoutes())
+  })
 }
 
-// Graceful shutdown
 const shutdown = async () => {
   console.log("\n🔄 Shutting down gracefully...");
   await fastify.close();
