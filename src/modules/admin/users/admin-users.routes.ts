@@ -3,8 +3,11 @@ import { verifyAdminJWT } from "../middleware/verifyAdminJWT.js";
 import { requirePermission } from "../middleware/requirePermission.js";
 import {
   getAdminUsersHandler,
+  getAdminRolesHandler,
+  getAdminAuditLogHandler,
   createAdminUserHandler,
   deactivateAdminUserHandler,
+  reactivateAdminUserHandler,
 } from "./admin-users.controller.js";
 import type {
   CreateAdminUserBody,
@@ -14,7 +17,6 @@ import type {
 interface CreateAdminUserRoute extends RouteGenericInterface {
   Body: CreateAdminUserBody;
 }
-
 interface AdminUserParamsRoute extends RouteGenericInterface {
   Params: AdminUserParams;
 }
@@ -22,7 +24,7 @@ interface AdminUserParamsRoute extends RouteGenericInterface {
 export default async function adminUserRoutes(
   fastify: FastifyInstance,
 ): Promise<void> {
-  // GET /admin/users — list all admins
+  // GET /admin/users
   fastify.get(
     "/users",
     {
@@ -31,7 +33,25 @@ export default async function adminUserRoutes(
     getAdminUsersHandler,
   );
 
-  // POST /admin/users — promote a user to admin
+  // GET /admin/users/roles
+  fastify.get(
+    "/users/roles",
+    {
+      preHandler: [verifyAdminJWT, requirePermission("admin:manage")],
+    },
+    getAdminRolesHandler,
+  );
+
+  // GET /admin/users/:id/audit-log
+  fastify.get<AdminUserParamsRoute>(
+    "/users/:id/audit-log",
+    {
+      preHandler: [verifyAdminJWT, requirePermission("admin:manage")],
+    },
+    getAdminAuditLogHandler,
+  );
+
+  // POST /admin/users
   fastify.post<CreateAdminUserRoute>(
     "/users",
     {
@@ -40,12 +60,21 @@ export default async function adminUserRoutes(
     createAdminUserHandler,
   );
 
-  // PATCH /admin/users/:id/deactivate — revoke admin access
+  // PATCH /admin/users/:id/deactivate
   fastify.patch<AdminUserParamsRoute>(
     "/users/:id/deactivate",
     {
       preHandler: [verifyAdminJWT, requirePermission("admin:manage")],
     },
     deactivateAdminUserHandler,
+  );
+
+  // PATCH /admin/users/:id/reactivate
+  fastify.patch<AdminUserParamsRoute>(
+    "/users/:id/reactivate",
+    {
+      preHandler: [verifyAdminJWT, requirePermission("admin:manage")],
+    },
+    reactivateAdminUserHandler,
   );
 }

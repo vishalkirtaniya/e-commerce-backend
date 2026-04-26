@@ -1,4 +1,10 @@
-import { z } from 'zod'
+import { z } from "zod";
+
+const ProductSizeSchema = z.object({
+  label: z.string().min(1),
+  price: z.number().positive(),
+  is_default: z.boolean().optional().default(false),
+});
 
 export const CreateProductSchema = z.object({
   body: z.object({
@@ -14,8 +20,10 @@ export const CreateProductSchema = z.object({
     is_new_arrival: z.boolean().optional().default(false),
     is_top_selling: z.boolean().optional().default(false),
     is_customizable: z.boolean().optional().default(true),
+    is_sold_out: z.boolean().optional().default(false),
+    sizes: z.array(ProductSizeSchema).optional().default([]),
   }),
-})
+});
 
 export const UpdateProductSchema = z.object({
   params: z.object({
@@ -30,16 +38,19 @@ export const UpdateProductSchema = z.object({
     is_new_arrival: z.boolean().optional(),
     is_top_selling: z.boolean().optional(),
     is_customizable: z.boolean().optional(),
+    is_sold_out: z.boolean().optional(),
+    sizes: z.array(ProductSizeSchema).optional(),
   }),
-})
+});
 
 export const ProductParamsSchema = z.object({
   params: z.object({
     id: z.string(),
   }),
-})
+});
 
 // Inferred types
-export type ProductParams = { id: string }
-export type CreateProductBody = z.infer<typeof CreateProductSchema>['body']
-export type UpdateProductBody = z.infer<typeof UpdateProductSchema>['body']
+export type ProductParams = { id: string };
+export type CreateProductBody = z.infer<typeof CreateProductSchema>["body"];
+export type UpdateProductBody = z.infer<typeof UpdateProductSchema>["body"];
+export type ProductSize = z.infer<typeof ProductSizeSchema>;

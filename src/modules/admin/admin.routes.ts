@@ -7,6 +7,9 @@ import adminAuthRoutes from "./auth/admin-auth.routes.js";
 import productImageRoutes from "./product-images/product-images.routes";
 import categoryRoutes from "./categories/categories.routes";
 import materialRoutes from "./materials/materials.routes";
+import customerRoutes from "./customers/customers.routes";
+import analyticsRoutes from "./analytics/analytics.routes";
+import promoRoutes from "./promos/promos.routes";
 
 export default async function adminRoutes(
   fastify: FastifyInstance,
@@ -19,6 +22,9 @@ export default async function adminRoutes(
   fastify.register(productImageRoutes);
   fastify.register(categoryRoutes);
   fastify.register(materialRoutes);
+  fastify.register(customerRoutes)
+  fastify.register(analyticsRoutes)
+  fastify.register(promoRoutes)
   // future: fastify.register(userRoutes)
   // future: fastify.register(analyticsRoutes)
 }
