@@ -1,5 +1,5 @@
-import pool from '../../services/db';
-import type { ProductsQuery } from './products.schema';
+import pool from "../../services/db";
+import type { ProductsQuery } from "./products.schema";
 
 // ── GET /api/products  (shop page — filtered + paginated) ─────
 export async function getProducts(query: ProductsQuery) {
@@ -16,7 +16,7 @@ export async function getProducts(query: ProductsQuery) {
 
   const offset = (page - 1) * limit;
   const params: any[] = [];
-  let   paramIdx = 1;
+  let paramIdx = 1;
 
   // ── WHERE clauses built dynamically ──────────────────────────
   const where: string[] = [];
@@ -53,16 +53,16 @@ export async function getProducts(query: ProductsQuery) {
     `);
   }
 
-  const whereSQL = where.length ? `WHERE ${where.join(' AND ')}` : '';
+  const whereSQL = where.length ? `WHERE ${where.join(" AND ")}` : "";
 
   // ── ORDER BY ──────────────────────────────────────────────────
   const orderMap: Record<string, string> = {
-    price_asc:  'p.price ASC',
-    price_desc: 'p.price DESC',
-    rating:     'p.rating DESC',
-    newest:     'p.created_at DESC',
+    price_asc: "p.price ASC",
+    price_desc: "p.price DESC",
+    rating: "p.rating DESC",
+    newest: "p.created_at DESC",
   };
-  const orderSQL = orderMap[sort_by ?? 'newest'];
+  const orderSQL = orderMap[sort_by ?? "newest"];
 
   // ── Main query ────────────────────────────────────────────────
   const dataQuery = `
@@ -120,7 +120,7 @@ export async function getProducts(query: ProductsQuery) {
     pool.query(countQuery, params.slice(0, params.length - 2)), // exclude limit/offset
   ]);
 
-  const total      = parseInt(countResult.rows[0].total, 10);
+  const total = parseInt(countResult.rows[0].total, 10);
   const totalPages = Math.ceil(total / limit);
 
   return {
@@ -158,7 +158,7 @@ export async function getProductBySlug(slug: string) {
     FROM products p
     JOIN categories c ON c.id = p.category_id
     WHERE p.slug = $1`,
-    [slug]
+    [slug],
   );
 
   if (productResult.rows.length === 0) {
@@ -173,7 +173,7 @@ export async function getProductBySlug(slug: string) {
      FROM product_images
      WHERE product_id = $1
      ORDER BY is_primary DESC, sort_order ASC`,
-    [product.id]
+    [product.id],
   );
 
   // 3. Size options
@@ -182,7 +182,7 @@ export async function getProductBySlug(slug: string) {
      FROM product_sizes
      WHERE product_id = $1
      ORDER BY price ASC`,
-    [product.id]
+    [product.id],
   );
 
   // 4. Occasions
@@ -191,7 +191,7 @@ export async function getProductBySlug(slug: string) {
      FROM product_occasions po
      JOIN occasions o ON o.id = po.occasion_id
      WHERE po.product_id = $1`,
-    [product.id]
+    [product.id],
   );
 
   // 5. Reviews for this product
@@ -201,7 +201,7 @@ export async function getProductBySlug(slug: string) {
      WHERE product_id = $1
      ORDER BY created_at DESC
      LIMIT 10`,
-    [product.id]
+    [product.id],
   );
 
   // 6. Related products — same category, exclude self, max 4
@@ -226,15 +226,15 @@ export async function getProductBySlug(slug: string) {
     AND p.slug != $1
     ORDER BY p.rating DESC
     LIMIT 4`,
-    [slug]
+    [slug],
   );
 
   return {
     ...product,
-    images:           imagesResult.rows,
-    sizes:            sizesResult.rows,
-    occasions:        occasionsResult.rows,
-    reviews:          reviewsResult.rows,
+    images: imagesResult.rows,
+    sizes: sizesResult.rows,
+    occasions: occasionsResult.rows,
+    reviews: reviewsResult.rows,
     related_products: relatedResult.rows,
   };
 }
@@ -245,13 +245,15 @@ export async function getFilterOptions() {
     pool.query(`SELECT id, name, slug FROM categories ORDER BY name`),
     pool.query(`SELECT id, name, slug FROM occasions ORDER BY name`),
     pool.query(`SELECT DISTINCT material FROM products ORDER BY material`),
-    pool.query(`SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM products`),
+    pool.query(
+      `SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM products`,
+    ),
   ]);
 
   return {
-    categories:  categories.rows,
-    occasions:   occasions.rows,
-    materials:   materials.rows.map((r: any) => r.material),
+    categories: categories.rows,
+    occasions: occasions.rows,
+    materials: materials.rows.map((r: any) => r.material),
     price_range: {
       min: parseFloat(priceRange.rows[0].min_price) || 0,
       max: parseFloat(priceRange.rows[0].max_price) || 10000,

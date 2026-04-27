@@ -1,12 +1,12 @@
-# Graph Report - /home/shilpa/projects/ecommerce-backend  (2026-04-24)
+# Graph Report - /home/shilpa/projects/ecommerce-backend  (2026-04-26)
 
 ## Corpus Check
-- 74 files · ~25,797 words
+- 77 files · ~29,834 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 190 nodes · 249 edges · 35 communities detected
-- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 66 edges (avg confidence: 0.8)
+- 202 nodes · 274 edges · 35 communities detected
+- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 73 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -47,8 +47,8 @@
 - [[_COMMUNITY_Community 34|Community 34]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `auditLog()` - 9 edges
-2. `requirePermission()` - 7 edges
+1. `requirePermission()` - 10 edges
+2. `auditLog()` - 10 edges
 3. `getOrCreateCart()` - 6 edges
 4. `signup()` - 5 edges
 5. `signin()` - 5 edges
@@ -61,20 +61,20 @@
 ## Surprising Connections (you probably didn't know these)
 - `hashPassword()` --calls--> `signup()`  [INFERRED]
   /home/shilpa/projects/ecommerce-backend/src/utils/hash.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
-- `requirePermission()` --calls--> `orderRoutes()`  [INFERRED]
-  /home/shilpa/projects/ecommerce-backend/src/modules/admin/middleware/requirePermission.ts → /home/shilpa/projects/ecommerce-backend/src/modules/admin/orders/orders.routes.ts
 - `comparePassword()` --calls--> `signin()`  [INFERRED]
   /home/shilpa/projects/ecommerce-backend/src/utils/hash.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
 - `verifyRefreshToken()` --calls--> `refreshTokens()`  [INFERRED]
   /home/shilpa/projects/ecommerce-backend/src/utils/jwt.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
 - `signupHandler()` --calls--> `signup()`  [INFERRED]
   /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.controller.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
+- `signinHandler()` --calls--> `signin()`  [INFERRED]
+  /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.controller.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.13
-Nodes (7): getAdminWithPermissions(), adminUserRoutes(), categoryRoutes(), materialRoutes(), productImageRoutes(), requirePermission(), verifyAdminJWT()
+Cohesion: 0.11
+Nodes (11): getAdminWithPermissions(), adminUserRoutes(), analyticsRoutes(), categoryRoutes(), customerRoutes(), materialRoutes(), orderRoutes(), productImageRoutes() (+3 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.16
@@ -85,20 +85,20 @@ Cohesion: 0.19
 Nodes (16): addToCartHandler(), applyPromoHandler(), clearCartHandler(), getCartHandler(), removeCartItemHandler(), removePromoHandler(), updateCartItemHandler(), addToCart() (+8 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.16
-Nodes (12): getOrderByIdHandler(), getOrdersHandler(), placeOrderHandler(), updateOrderStatusHandler(), orderRoutes(), generateOrderNumber(), getAllOrders(), getOrderById() (+4 more)
-
-### Community 4 - "Community 4"
 Cohesion: 0.18
 Nodes (13): auditLog(), refundOrderHandler(), createProductHandler(), deleteProductHandler(), getProductHandler(), toggleSoldOutHandler(), updateProductHandler(), productRoutes() (+5 more)
 
+### Community 4 - "Community 4"
+Cohesion: 0.18
+Nodes (11): getOrderByIdHandler(), getOrdersHandler(), placeOrderHandler(), updateOrderStatusHandler(), generateOrderNumber(), getAllOrders(), getOrderById(), getOrders() (+3 more)
+
 ### Community 5 - "Community 5"
-Cohesion: 0.21
-Nodes (4): adminLoginHandler(), adminLogin(), comparePassword(), hashPassword()
+Cohesion: 0.19
+Nodes (12): createAdminUserHandler(), deactivateAdminUserHandler(), getAdminAuditLogHandler(), getAdminRolesHandler(), getAdminUsersHandler(), reactivateAdminUserHandler(), createAdminUser(), deactivateAdminUser() (+4 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.31
-Nodes (6): createAdminUserHandler(), deactivateAdminUserHandler(), getAdminUsersHandler(), createAdminUser(), deactivateAdminUser(), getAllAdminUsers()
+Cohesion: 0.21
+Nodes (4): adminLoginHandler(), adminLogin(), comparePassword(), hashPassword()
 
 ### Community 7 - "Community 7"
 Cohesion: 0.27
@@ -259,17 +259,17 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `comparePassword()` connect `Community 5` to `Community 1`?**
-  _High betweenness centrality (0.065) - this node is a cross-community bridge._
-- **Why does `signin()` connect `Community 1` to `Community 5`?**
+- **Why does `comparePassword()` connect `Community 6` to `Community 1`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Why does `signin()` connect `Community 1` to `Community 6`?**
   _High betweenness centrality (0.061) - this node is a cross-community bridge._
-- **Are the 8 inferred relationships involving `auditLog()` (e.g. with `updateOrderStatusHandler()` and `refundOrderHandler()`) actually correct?**
-  _`auditLog()` has 8 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 6 inferred relationships involving `requirePermission()` (e.g. with `orderRoutes()` and `productRoutes()`) actually correct?**
-  _`requirePermission()` has 6 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 9 inferred relationships involving `requirePermission()` (e.g. with `orderRoutes()` and `productRoutes()`) actually correct?**
+  _`requirePermission()` has 9 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 9 inferred relationships involving `auditLog()` (e.g. with `updateOrderStatusHandler()` and `refundOrderHandler()`) actually correct?**
+  _`auditLog()` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 4 inferred relationships involving `signup()` (e.g. with `signupHandler()` and `hashPassword()`) actually correct?**
   _`signup()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 4 inferred relationships involving `signin()` (e.g. with `signinHandler()` and `comparePassword()`) actually correct?**
   _`signin()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.13 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._

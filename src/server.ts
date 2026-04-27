@@ -18,6 +18,7 @@ import { cartRoutes } from "./modules/cart/cart.routes";
 import { orderRoutes } from "./modules/orders/order.routes";
 import { paymentRoutes } from "./modules/payments/payments.routes";
 import adminRoutes from "./modules/admin/admin.routes";
+import searchRoutes from "./modules/search/search.routes";
 import redis from "./services/redis";
 import pool from "./services/db";
 
@@ -43,6 +44,7 @@ async function bootstrap() {
   fastify.register(orderRoutes, { prefix: "/api/orders" });
   fastify.register(paymentRoutes, { prefix: "/api/payments" });
   fastify.register(adminRoutes, { prefix: "/admin"})
+  fastify.register(searchRoutes, {prefix: "/api"})
 
   fastify.get("/health", async () => ({
     status: "ok",
