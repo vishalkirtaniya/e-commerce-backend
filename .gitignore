@@ -19,7 +19,8 @@
 
 # production
 /build
-
+/graphify-out/
+.codex
 # misc
 .DS_Store
 *.pem

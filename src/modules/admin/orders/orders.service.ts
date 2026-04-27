@@ -1,51 +1,74 @@
-import { supabase } from '../../../lib/supabaseClient.js'
-import type { UpdateOrderStatusBody } from './orders.schema.js'
+import pool from "../../../services/db.js";
+import type { UpdateOrderStatusBody } from "./orders.schema.js";
 
 export async function getAllOrders() {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*, order_items(*), addresses(*)')
-    .order('created_at', { ascending: false })
-
-  if (error) throw new Error(error.message)
-  return data
+  const result = await pool.query(`
+    SELECT
+      o.*,
+      COALESCE(
+        json_agg(DISTINCT jsonb_build_object(
+          'id', oi.id,
+          'product_id', oi.product_id,
+          'name', oi.name,
+          'image_url', oi.image_url,
+          'price', oi.price,
+          'size_label', oi.size_label,
+          'quantity', oi.quantity,
+          'customization', oi.customization
+        )) FILTER (WHERE oi.id IS NOT NULL),
+        '[]'
+      ) AS order_items,
+      row_to_json(a.*) AS addresses
+    FROM orders o
+    LEFT JOIN order_items oi ON oi.order_id = o.id
+    LEFT JOIN addresses a ON a.id = o.address_id
+    GROUP BY o.id, a.id
+    ORDER BY o.created_at DESC
+  `);
+  return result.rows;
 }
 
 export async function getOrderStatus(id: string) {
-  const { data } = await supabase
-    .from('orders')
-    .select('status')
-    .eq('id', id)
-    .maybeSingle()
-
-  return data as { status: string } | null
+  const result = await pool.query(`SELECT status FROM orders WHERE id = $1`, [
+    id,
+  ]);
+  if (result.rows.length === 0) return null;
+  return result.rows[0] as { status: string };
 }
 
 export async function updateOrderStatus(
   id: string,
-  body: UpdateOrderStatusBody
+  body: UpdateOrderStatusBody,
 ) {
-  const { data, error } = await supabase
-    .from('orders')
-    .update({ status: body.status, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .maybeSingle()
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
 
-  if (error) throw new Error(error.message)
-  if (!data) throw new Error('Order not found')
+    const updateResult = await client.query(
+      `UPDATE orders
+       SET status = $1, updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [body.status, id],
+    );
 
-  const { error: historyError } = await supabase
-    .from('order_status_history')
-    .insert({
-      order_id: Number(id),
-      status: body.status,
-      label: body.label,
-    })
+    if (updateResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      throw new Error("Order not found");
+    }
 
-  if (historyError) {
-    console.error('[orders.service] Failed to insert status history:', historyError.message)
+    await client.query(
+      `INSERT INTO order_status_history (order_id, status, label)
+       VALUES ($1, $2, $3)`,
+      [Number(id), body.status, body.label],
+    );
+
+    await client.query("COMMIT");
+    return updateResult.rows[0];
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
   }
-
-  return data
 }

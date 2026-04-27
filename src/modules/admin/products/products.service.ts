@@ -30,6 +30,7 @@ export async function getAllProducts() {
     LEFT JOIN categories c ON c.id = p.category_id
     LEFT JOIN product_images pi ON pi.product_id = p.id
     LEFT JOIN product_sizes ps ON ps.product_id = p.id
+    WHERE p.is_archived = false        -- ← exclude archived
     GROUP BY p.id, c.id
     ORDER BY p.created_at DESC
   `);
@@ -93,61 +94,158 @@ export async function getProductById(id: string) {
 }
 
 export async function createProduct(body: CreateProductBody) {
-  const result = await pool.query(
-    `
-    INSERT INTO products (
-      sku, slug, name, description, material,
-      price, original_price, discount, category_id,
-      is_new_arrival, is_top_selling, is_customizable
-    ) VALUES (
-      $1, $2, $3, $4, $5,
-      $6, $7, $8, $9,
-      $10, $11, $12
-    ) RETURNING *
-  `,
-    [
-      body.sku,
-      body.slug,
-      body.name,
-      body.description ?? null,
-      body.material,
-      body.price,
-      body.original_price ?? null,
-      body.discount ?? null,
-      body.category_id,
-      body.is_new_arrival,
-      body.is_top_selling,
-      body.is_customizable,
-    ],
-  );
+  const client = await pool.connect();
 
-  if (result.rows.length === 0) throw new Error("Failed to create product");
-  return result.rows[0];
+  try {
+    await client.query("BEGIN");
+
+    // 1. Insert the product
+    const result = await client.query(
+      `
+      INSERT INTO products (
+        sku, slug, name, description, material,
+        price, original_price, discount, category_id,
+        is_new_arrival, is_top_selling, is_customizable, is_sold_out
+      ) VALUES (
+        $1, $2, $3, $4, $5,
+        $6, $7, $8, $9,
+        $10, $11, $12, $13
+      ) RETURNING *
+      `,
+      [
+        body.sku,
+        body.slug,
+        body.name,
+        body.description ?? null,
+        body.material,
+        body.price,
+        body.original_price ?? null,
+        body.discount ?? null,
+        body.category_id,
+        body.is_new_arrival,
+        body.is_top_selling,
+        body.is_customizable,
+        body.is_sold_out ?? false,
+      ],
+    );
+
+    const product = result.rows[0];
+
+    // 2. Insert sizes if provided
+    if (body.sizes && body.sizes.length > 0) {
+      for (let i = 0; i < body.sizes.length; i++) {
+        const size = body.sizes[i];
+        await client.query(
+          `INSERT INTO product_sizes (product_id, label, price, is_default)
+           VALUES ($1, $2, $3, $4)`,
+          [product.id, size.label, size.price, i === 0], // first size is default
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    return product;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function updateProduct(id: string, body: UpdateProductBody) {
-  // Build SET clause dynamically from provided fields
-  const fields = Object.entries(body).filter(([, v]) => v !== undefined);
-  if (fields.length === 0) throw new Error("No fields to update");
+  const client = await pool.connect();
 
-  const setClauses = fields.map(([key], i) => `${key} = $${i + 1}`).join(", ");
-  const values = fields.map(([, v]) => v);
+  try {
+    await client.query("BEGIN");
 
-  const result = await pool.query(
-    `UPDATE products SET ${setClauses} WHERE id = $${fields.length + 1} RETURNING *`,
-    [...values, id],
-  );
+    // 1. Update product fields (excluding sizes)
+    const { sizes, ...productFields } = body;
+    const fields = Object.entries(productFields).filter(
+      ([, v]) => v !== undefined,
+    );
 
-  if (result.rows.length === 0) throw new Error("Product not found");
-  return result.rows[0];
+    if (fields.length > 0) {
+      const setClauses = fields
+        .map(([key], i) => `${key} = $${i + 1}`)
+        .join(", ");
+      const values = fields.map(([, v]) => v);
+
+      const result = await client.query(
+        `UPDATE products SET ${setClauses} WHERE id = $${fields.length + 1} RETURNING *`,
+        [...values, id],
+      );
+
+      if (result.rows.length === 0) throw new Error("Product not found");
+    }
+
+    // 2. Replace sizes if provided
+    if (sizes && sizes.length > 0) {
+      // Delete existing sizes
+      await client.query(`DELETE FROM product_sizes WHERE product_id = $1`, [
+        id,
+      ]);
+
+      // Insert new sizes
+      for (let i = 0; i < sizes.length; i++) {
+        const size = sizes[i];
+        await client.query(
+          `INSERT INTO product_sizes (product_id, label, price, is_default)
+           VALUES ($1, $2, $3, $4)`,
+          [id, size.label, size.price, i === 0], // first size is default
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+
+    // Return updated product with sizes
+    const updated = await pool.query(
+      `SELECT p.*, 
+        json_agg(json_build_object('id', ps.id, 'label', ps.label, 'price', ps.price, 'is_default', ps.is_default)) 
+          FILTER (WHERE ps.id IS NOT NULL) AS sizes
+       FROM products p
+       LEFT JOIN product_sizes ps ON ps.product_id = p.id
+       WHERE p.id = $1
+       GROUP BY p.id`,
+      [id],
+    );
+
+    return updated.rows[0];
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function deleteProduct(id: string) {
+  // Check if product has been ordered
+  const ordered = await pool.query(
+    `SELECT COUNT(*)::int AS count FROM order_items WHERE product_id = $1`,
+    [id],
+  );
+
+  if (ordered.rows[0].count > 0) {
+    // Soft delete — archive instead of hard delete
+    const result = await pool.query(
+      `UPDATE products
+       SET is_archived = true, is_sold_out = true
+       WHERE id = $1 RETURNING *`,
+      [id],
+    );
+    if (result.rows.length === 0) throw new Error("Product not found");
+    return { archived: true, product: result.rows[0] };
+  }
+
+  // Hard delete — safe since no orders reference this product
   const result = await pool.query(
     `DELETE FROM products WHERE id = $1 RETURNING id`,
     [id],
   );
   if (result.rows.length === 0) throw new Error("Product not found");
+  return { archived: false };
 }
 
 export async function toggleSoldOut(id: string, isSoldOut: boolean) {

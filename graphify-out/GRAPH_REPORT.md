@@ -1,12 +1,12 @@
-# Graph Report - /home/shilpa/projects/ecommerce-backend  (2026-04-24)
+# Graph Report - /home/shilpa/projects/ecommerce-backend  (2026-04-26)
 
 ## Corpus Check
-- 67 files · ~11,370 words
+- 77 files · ~29,834 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 173 nodes · 222 edges · 31 communities detected
-- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 61 edges (avg confidence: 0.8)
+- 202 nodes · 274 edges · 35 communities detected
+- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 73 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -41,26 +41,30 @@
 - [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
 - [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `auditLog()` - 8 edges
-2. `getOrCreateCart()` - 6 edges
-3. `signup()` - 5 edges
-4. `signin()` - 5 edges
-5. `refreshTokens()` - 5 edges
-6. `signAccessToken()` - 4 edges
-7. `signRefreshToken()` - 4 edges
-8. `getProductsHandler()` - 4 edges
-9. `getCart()` - 4 edges
-10. `requirePermission()` - 4 edges
+1. `requirePermission()` - 10 edges
+2. `auditLog()` - 10 edges
+3. `getOrCreateCart()` - 6 edges
+4. `signup()` - 5 edges
+5. `signin()` - 5 edges
+6. `refreshTokens()` - 5 edges
+7. `signAccessToken()` - 4 edges
+8. `signRefreshToken()` - 4 edges
+9. `getProductsHandler()` - 4 edges
+10. `getCart()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `signup()` --calls--> `hashPassword()`  [INFERRED]
-  /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts → /home/shilpa/projects/ecommerce-backend/src/utils/hash.ts
-- `signin()` --calls--> `comparePassword()`  [INFERRED]
-  /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts → /home/shilpa/projects/ecommerce-backend/src/utils/hash.ts
-- `refreshTokens()` --calls--> `verifyRefreshToken()`  [INFERRED]
-  /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts → /home/shilpa/projects/ecommerce-backend/src/utils/jwt.ts
+- `hashPassword()` --calls--> `signup()`  [INFERRED]
+  /home/shilpa/projects/ecommerce-backend/src/utils/hash.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
+- `comparePassword()` --calls--> `signin()`  [INFERRED]
+  /home/shilpa/projects/ecommerce-backend/src/utils/hash.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
+- `verifyRefreshToken()` --calls--> `refreshTokens()`  [INFERRED]
+  /home/shilpa/projects/ecommerce-backend/src/utils/jwt.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
 - `signupHandler()` --calls--> `signup()`  [INFERRED]
   /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.controller.ts → /home/shilpa/projects/ecommerce-backend/src/modules/auth/auth.service.ts
 - `signinHandler()` --calls--> `signin()`  [INFERRED]
@@ -69,31 +73,31 @@
 ## Communities
 
 ### Community 0 - "Community 0"
+Cohesion: 0.11
+Nodes (11): getAdminWithPermissions(), adminUserRoutes(), analyticsRoutes(), categoryRoutes(), customerRoutes(), materialRoutes(), orderRoutes(), productImageRoutes() (+3 more)
+
+### Community 1 - "Community 1"
 Cohesion: 0.16
 Nodes (14): authenticate(), logoutHandler(), refreshHandler(), signinHandler(), signupHandler(), logout(), refreshTokens(), signin() (+6 more)
 
-### Community 1 - "Community 1"
+### Community 2 - "Community 2"
 Cohesion: 0.19
 Nodes (16): addToCartHandler(), applyPromoHandler(), clearCartHandler(), getCartHandler(), removeCartItemHandler(), removePromoHandler(), updateCartItemHandler(), addToCart() (+8 more)
 
-### Community 2 - "Community 2"
-Cohesion: 0.16
-Nodes (12): getOrderByIdHandler(), getOrdersHandler(), placeOrderHandler(), updateOrderStatusHandler(), orderRoutes(), generateOrderNumber(), getAllOrders(), getOrderById() (+4 more)
-
 ### Community 3 - "Community 3"
-Cohesion: 0.19
-Nodes (9): createAdminUserHandler(), deactivateAdminUserHandler(), getAdminUsersHandler(), adminUserRoutes(), createAdminUser(), deactivateAdminUser(), getAllAdminUsers(), productRoutes() (+1 more)
+Cohesion: 0.18
+Nodes (13): auditLog(), refundOrderHandler(), createProductHandler(), deleteProductHandler(), getProductHandler(), toggleSoldOutHandler(), updateProductHandler(), productRoutes() (+5 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.23
-Nodes (10): auditLog(), refundOrderHandler(), createProductHandler(), deleteProductHandler(), getProductHandler(), updateProductHandler(), createProduct(), deleteProduct() (+2 more)
+Cohesion: 0.18
+Nodes (11): getOrderByIdHandler(), getOrdersHandler(), placeOrderHandler(), updateOrderStatusHandler(), generateOrderNumber(), getAllOrders(), getOrderById(), getOrders() (+3 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.21
-Nodes (2): getAdminWithPermissions(), verifyAdminJWT()
+Cohesion: 0.19
+Nodes (12): createAdminUserHandler(), deactivateAdminUserHandler(), getAdminAuditLogHandler(), getAdminRolesHandler(), getAdminUsersHandler(), reactivateAdminUserHandler(), createAdminUser(), deactivateAdminUser() (+4 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.19
+Cohesion: 0.21
 Nodes (4): adminLoginHandler(), adminLogin(), comparePassword(), hashPassword()
 
 ### Community 7 - "Community 7"
@@ -114,15 +118,15 @@ Nodes (2): registerPlugins(), bootstrap()
 
 ### Community 11 - "Community 11"
 Cohesion: 0.5
-Nodes (2): getNewArrivalsHandler(), getNewArrivals()
+Nodes (0): 
 
 ### Community 12 - "Community 12"
 Cohesion: 0.5
-Nodes (2): getTopSellingHandler(), getTopSelling()
+Nodes (2): getNewArrivalsHandler(), getNewArrivals()
 
 ### Community 13 - "Community 13"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.5
+Nodes (2): getTopSellingHandler(), getTopSelling()
 
 ### Community 14 - "Community 14"
 Cohesion: 1.0
@@ -192,56 +196,80 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
+### Community 31 - "Community 31"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 32 - "Community 32"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 33 - "Community 33"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 34 - "Community 34"
+Cohesion: 1.0
+Nodes (0): 
+
 ## Knowledge Gaps
-- **Thin community `Community 13`** (2 nodes): `authRoutes()`, `auth.routes.ts`
+- **Thin community `Community 14`** (2 nodes): `authRoutes()`, `auth.routes.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 14`** (2 nodes): `cartRoutes()`, `cart.routes.ts`
+- **Thin community `Community 15`** (2 nodes): `cartRoutes()`, `cart.routes.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 15`** (2 nodes): `newArrivals.routes.ts`, `newArrivalsRoutes()`
+- **Thin community `Community 16`** (2 nodes): `newArrivals.routes.ts`, `newArrivalsRoutes()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 16`** (2 nodes): `topSelling.routes.ts`, `topSellingRoutes()`
+- **Thin community `Community 17`** (2 nodes): `topSelling.routes.ts`, `topSellingRoutes()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (2 nodes): `customerReviewRoutes()`, `customerReviews.routes.ts`
+- **Thin community `Community 18`** (2 nodes): `customerReviewRoutes()`, `customerReviews.routes.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (2 nodes): `order.routes.ts`, `orderRoutes()`
+- **Thin community `Community 19`** (2 nodes): `order.routes.ts`, `orderRoutes()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 19`** (2 nodes): `payments.routes.ts`, `paymentRoutes()`
+- **Thin community `Community 20`** (2 nodes): `payments.routes.ts`, `paymentRoutes()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (1 nodes): `razorpay.ts`
+- **Thin community `Community 21`** (1 nodes): `razorpay.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 21`** (1 nodes): `redis.ts`
+- **Thin community `Community 22`** (1 nodes): `redis.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 22`** (1 nodes): `supabase.ts`
+- **Thin community `Community 23`** (1 nodes): `supabase.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 23`** (1 nodes): `auth.schema.ts`
+- **Thin community `Community 24`** (1 nodes): `auth.schema.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 24`** (1 nodes): `products.schema.ts`
+- **Thin community `Community 25`** (1 nodes): `products.schema.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 25`** (1 nodes): `cart.schema.ts`
+- **Thin community `Community 26`** (1 nodes): `cart.schema.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 26`** (1 nodes): `newArrivals.schema.ts`
+- **Thin community `Community 27`** (1 nodes): `product-images.controller.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (1 nodes): `topSelling.schema.ts`
+- **Thin community `Community 28`** (1 nodes): `project-images.schema.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 28`** (1 nodes): `customerReviews.schema.ts`
+- **Thin community `Community 29`** (1 nodes): `newArrivals.schema.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (1 nodes): `orders.schema.ts`
+- **Thin community `Community 30`** (1 nodes): `topSelling.schema.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (1 nodes): `payments.schema.ts`
+- **Thin community `Community 31`** (1 nodes): `customerReviews.schema.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 32`** (1 nodes): `orders.schema.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 33`** (1 nodes): `payments.schema.ts`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 34`** (1 nodes): `fastify-multipart.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getProductsHandler()` connect `Community 8` to `Community 4`?**
-  _High betweenness centrality (0.030) - this node is a cross-community bridge._
-- **Why does `auditLog()` connect `Community 4` to `Community 2`, `Community 3`, `Community 5`?**
-  _High betweenness centrality (0.017) - this node is a cross-community bridge._
-- **Are the 7 inferred relationships involving `auditLog()` (e.g. with `updateOrderStatusHandler()` and `refundOrderHandler()`) actually correct?**
-  _`auditLog()` has 7 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `comparePassword()` connect `Community 6` to `Community 1`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Why does `signin()` connect `Community 1` to `Community 6`?**
+  _High betweenness centrality (0.061) - this node is a cross-community bridge._
+- **Are the 9 inferred relationships involving `requirePermission()` (e.g. with `orderRoutes()` and `productRoutes()`) actually correct?**
+  _`requirePermission()` has 9 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 9 inferred relationships involving `auditLog()` (e.g. with `updateOrderStatusHandler()` and `refundOrderHandler()`) actually correct?**
+  _`auditLog()` has 9 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 4 inferred relationships involving `signup()` (e.g. with `signupHandler()` and `hashPassword()`) actually correct?**
   _`signup()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 4 inferred relationships involving `signin()` (e.g. with `signinHandler()` and `comparePassword()`) actually correct?**
   _`signin()` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 4 inferred relationships involving `refreshTokens()` (e.g. with `refreshHandler()` and `verifyRefreshToken()`) actually correct?**
-  _`refreshTokens()` has 4 INFERRED edges - model-reasoned connections that need verification._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._

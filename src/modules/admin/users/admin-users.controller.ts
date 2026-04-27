@@ -1,8 +1,11 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
 import {
   getAllAdminUsers,
+  getAdminAuditLog,
+  getAllRoles,
   createAdminUser,
   deactivateAdminUser,
+  reactivateAdminUser,
 } from "./admin-users.service.js";
 import { auditLog } from "../shared/auditLog.js";
 import {
@@ -27,6 +30,32 @@ export async function getAdminUsersHandler(
   }
 }
 
+export async function getAdminRolesHandler(
+  _request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  try {
+    const data = await getAllRoles();
+    return reply.send(data);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unexpected error";
+    return reply.code(500).send({ error: message });
+  }
+}
+
+export async function getAdminAuditLogHandler(
+  request: FastifyRequest<{ Params: AdminUserParams }>,
+  reply: FastifyReply,
+) {
+  try {
+    const data = await getAdminAuditLog(Number(request.params.id));
+    return reply.send(data);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unexpected error";
+    return reply.code(500).send({ error: message });
+  }
+}
+
 export async function createAdminUserHandler(
   request: FastifyRequest<{ Body: CreateAdminUserBody }>,
   reply: FastifyReply,
@@ -35,10 +64,8 @@ export async function createAdminUserHandler(
   if (!result.success) {
     return reply.code(400).send({ error: result.error.flatten() });
   }
-
   try {
     const data = await createAdminUser(result.data.body);
-
     auditLog({
       adminUserId: request.admin.adminUserId,
       action: "CREATE_ADMIN_USER",
@@ -50,7 +77,6 @@ export async function createAdminUserHandler(
       },
       ipAddress: request.ip,
     });
-
     return reply.code(201).send(data);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unexpected error";
@@ -72,11 +98,9 @@ export async function deactivateAdminUserHandler(
   if (!result.success) {
     return reply.code(400).send({ error: result.error.flatten() });
   }
-
   try {
     const { id } = result.data.params;
     const data = await deactivateAdminUser(id);
-
     auditLog({
       adminUserId: request.admin.adminUserId,
       action: "DEACTIVATE_ADMIN_USER",
@@ -84,7 +108,32 @@ export async function deactivateAdminUserHandler(
       entityId: id,
       ipAddress: request.ip,
     });
+    return reply.send(data);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unexpected error";
+    const code = message === "Admin user not found" ? 404 : 500;
+    return reply.code(code).send({ error: message });
+  }
+}
 
+export async function reactivateAdminUserHandler(
+  request: FastifyRequest<{ Params: AdminUserParams }>,
+  reply: FastifyReply,
+) {
+  const result = AdminUserParamsSchema.safeParse({ params: request.params });
+  if (!result.success) {
+    return reply.code(400).send({ error: result.error.flatten() });
+  }
+  try {
+    const { id } = result.data.params;
+    const data = await reactivateAdminUser(id);
+    auditLog({
+      adminUserId: request.admin.adminUserId,
+      action: "REACTIVATE_ADMIN_USER",
+      entity: "admin_users",
+      entityId: id,
+      ipAddress: request.ip,
+    });
     return reply.send(data);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unexpected error";
