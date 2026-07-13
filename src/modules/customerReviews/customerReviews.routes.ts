@@ -1,7 +1,14 @@
 import { FastifyInstance } from "fastify";
-import { customerReviews } from "./customerReviews.controller";
-import { customerReviewsSchema } from "./customerReviews.schema";
+import { authenticate } from "../../middleware/auth";
+import {
+  getReviewsHandler,
+  createReviewHandler,
+} from "./customerReviews.controller";
 
-export default async function customerReviewsRoutes(app: FastifyInstance) {
-  app.get("/reviews/customer", { ...customerReviewsSchema }, customerReviews);
+export async function customerReviewRoutes(fastify: FastifyInstance) {
+  // GET /api/reviews?limit=6&featured=true
+  fastify.get("/", getReviewsHandler);
+
+  // POST /api/reviews  (auth required)
+  fastify.post("/", { preHandler: [authenticate] }, createReviewHandler);
 }

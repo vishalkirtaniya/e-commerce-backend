@@ -1,7 +1,7 @@
-import { FastifyInstance } from "fastify"
-import { newArrivals } from "./newArrivals.controller"
-import { newArrivalsSchema } from "./newArrivals.schema"
+import { FastifyInstance } from 'fastify';
+import { getNewArrivalsHandler } from './newArrivals.controller';
 
-export default async function newArrivalsRoutes(app: FastifyInstance) {
-  app.get("/products/new-arrivals", { ...newArrivalsSchema }, newArrivals)
+export async function newArrivalsRoutes(fastify: FastifyInstance) {
+  // GET /api/new-arrivals?limit=8
+  fastify.get('/', getNewArrivalsHandler);
 }

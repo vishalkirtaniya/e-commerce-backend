@@ -10,6 +10,8 @@
 !.yarn/releases
 !.yarn/versions
 
+/dist
+
 # testing
 /coverage
 
@@ -19,7 +21,8 @@
 
 # production
 /build
-
+/graphify-out/
+.codex
 # misc
 .DS_Store
 *.pem
@@ -39,3 +42,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma

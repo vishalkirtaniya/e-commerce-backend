@@ -1,0 +1,56 @@
+version: "3.9"
+
+# =============================================================
+# backend/docker-compose.yml
+# Run: docker compose -f backend-compose.yml up --build
+# Reads secrets from: ecommerce-backend/.env
+# =============================================================
+
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: backend.Dockerfile
+      target: runner
+    container_name: ecom_backend
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    ports:
+      - "${PORT:-5000}:${PORT:-5000}"
+    networks:
+      - ecom_network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:${PORT:-5000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # -----------------------------------------------------------
+  # Redis — uncomment when ready
+  # -----------------------------------------------------------
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: ecom_redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - ecom_network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+  #
+  # When enabling Redis:
+  #   1. Uncomment the redis service above
+  #   2. Set REDIS_URL=redis://redis:6379 in ecommerce-backend/.env
+  #   3. Add under backend depends_on:
+  #        redis:
+  #          condition: service_healthy
+
+networks:
+  ecom_network:
+    driver: bridge

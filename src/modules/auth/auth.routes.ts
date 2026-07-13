@@ -1,10 +1,28 @@
 import { FastifyInstance } from "fastify";
-import { signup, login, logout } from "./auth.controller";
+import { authenticate } from "../../middleware/auth";
+import {
+  signupHandler,
+  signinHandler,
+  refreshHandler,
+  logoutHandler,
+  meHandler,
+  forgotPasswordHandler,
+  resetPasswordHandler,
+  verifyOtpHandler,
+} from "./auth.controller";
 
-export default async function authRoutes(app: FastifyInstance) {
-  app.post("/auth/signup", signup);
+export async function authRoutes(fastify: FastifyInstance) {
+  // Public routes
+  fastify.post("/signup", signupHandler);
+  fastify.post("/signin", signinHandler);
+  fastify.post("/refresh", refreshHandler);
 
-  app.post("/auth/login", login);
+  // Password reset (public)
+  fastify.post("/forgot-password", forgotPasswordHandler);
+  fastify.post("/verify-otp", verifyOtpHandler);
+  fastify.post("/reset-password", resetPasswordHandler);
 
-  app.post("/auth/logout", logout);
+  // Protected routes
+  fastify.post("/logout", { preHandler: [authenticate] }, logoutHandler);
+  fastify.get("/me", { preHandler: [authenticate] }, meHandler);
 }

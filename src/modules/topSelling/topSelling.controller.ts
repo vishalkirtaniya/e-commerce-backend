@@ -1,30 +1,26 @@
-import { FastifyRequest, FastifyReply } from "fastify"
-import { getTopSellingProducts } from "./topSelling.service"
+import { FastifyRequest, FastifyReply } from "fastify";
+import { TopSellingQuerySchema } from "./topSelling.schema";
+import { getTopSelling } from "./topSelling.service";
 
-export async function topSelling(req: FastifyRequest, reply: FastifyReply) {
+// ── GET /api/top-selling ──────────────────────────────────────
+export async function getTopSellingHandler(
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const parsed = TopSellingQuerySchema.safeParse(request.query);
+  if (!parsed.success) {
+    return reply
+      .status(400)
+      .send({ error: parsed.error.flatten().fieldErrors });
+  }
+
   try {
-    const data = await getTopSellingProducts()
-
-    const products = data.map((p: any) => {
-      const hasDiscount = p.original_price && p.original_price > p.price
-      const discountPercent = hasDiscount
-        ? `-${Math.round((1 - p.price / p.original_price) * 100)}%`
-        : undefined
-
-      return {
-        id:            p.id,
-        name:          p.name,
-        price:         `$${p.price}`,
-        ...(hasDiscount && { originalPrice: `$${p.original_price}` }),
-        ...(hasDiscount && { discount: discountPercent }),
-        rating:        p.rating ? parseFloat(p.rating) : 0,
-        image:         p.product_images?.[0]?.image_url ?? "",
-      }
-    })
-
-    return reply.send(products)
+    const data = await getTopSelling(parsed.data.limit);
+    return reply.status(200).send({ data });
   } catch (err) {
-    req.log.error(err)
-    return reply.status(500).send({ error: "Internal server error" })
+    request.log.error(err);
+    return reply
+      .status(500)
+      .send({ error: "Failed to fetch top selling products" });
   }
 }

@@ -1,0 +1,1 @@
+{"version":3,"file":"newArrivals.schema.js","sourceRoot":"","sources":["../../../src/modules/newArrivals/newArrivals.schema.ts"],"names":[],"mappings":";;;AAAA,6BAAwB;AAEX,QAAA,sBAAsB,GAAG,OAAC,CAAC,MAAM,CAAC;IAC7C,KAAK,EAAE,OAAC,CAAC,MAAM,CAAC,MAAM,EAAE,CAAC,GAAG,EAAE,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC,GAAG,CAAC,EAAE,CAAC,CAAC,QAAQ,EAAE,CAAC,OAAO,CAAC,CAAC,CAAC;CACpE,CAAC,CAAC"}
