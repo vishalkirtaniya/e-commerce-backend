@@ -1,12 +1,12 @@
-# Graph Report - /home/shilpa/projects/ecommerce-backend  (2026-04-26)
+# Graph Report - /home/shilpa/projects/ecommerce-backend  (2026-04-27)
 
 ## Corpus Check
-- 77 files · ~29,834 words
+- 78 files · ~31,229 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 202 nodes · 274 edges · 35 communities detected
-- Extraction: 73% EXTRACTED · 27% INFERRED · 0% AMBIGUOUS · INFERRED: 73 edges (avg confidence: 0.8)
+- 204 nodes · 276 edges · 35 communities detected
+- Extraction: 74% EXTRACTED · 26% INFERRED · 0% AMBIGUOUS · INFERRED: 73 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -73,7 +73,7 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.11
+Cohesion: 0.1
 Nodes (11): getAdminWithPermissions(), adminUserRoutes(), analyticsRoutes(), categoryRoutes(), customerRoutes(), materialRoutes(), orderRoutes(), productImageRoutes() (+3 more)
 
 ### Community 1 - "Community 1"
@@ -272,4 +272,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 4 inferred relationships involving `signin()` (e.g. with `signinHandler()` and `comparePassword()`) actually correct?**
   _`signin()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.11 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.1 - nodes in this community are weakly interconnected._

@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = newArrivalsRoutes;
+exports.newArrivalsRoutes = newArrivalsRoutes;
 const newArrivals_controller_1 = require("./newArrivals.controller");
-const newArrivals_schema_1 = require("./newArrivals.schema");
-async function newArrivalsRoutes(app) {
-    app.get("/products/new-arrivals", { ...newArrivals_schema_1.newArrivalsSchema }, newArrivals_controller_1.newArrivals);
+async function newArrivalsRoutes(fastify) {
+    // GET /api/new-arrivals?limit=8
+    fastify.get('/', newArrivals_controller_1.getNewArrivalsHandler);
 }
+//# sourceMappingURL=newArrivals.routes.js.map

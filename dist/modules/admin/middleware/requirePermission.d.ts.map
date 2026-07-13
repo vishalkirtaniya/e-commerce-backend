@@ -1,0 +1,1 @@
+{"version":3,"file":"requirePermission.d.ts","sourceRoot":"","sources":["../../../../src/modules/admin/middleware/requirePermission.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,YAAY,EAAE,MAAM,SAAS,CAAA;AAC3D,OAAO,KAAK,EAAE,aAAa,EAAE,MAAM,yBAAyB,CAAA;AAE5D,wBAAgB,iBAAiB,CAAC,GAAG,EAAE,aAAa,IAEhD,SAAS,cAAc,EACvB,OAAO,YAAY,KAClB,OAAO,CAAC,IAAI,CAAC,CAOjB"}

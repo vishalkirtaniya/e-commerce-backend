@@ -1,0 +1,46 @@
+# backend/.dockerignore
+
+# Dependencies — reinstalled inside Docker
+node_modules
+
+# TypeScript build output (rebuilt inside Docker)
+dist
+build
+
+# Env files — injected at runtime via docker-compose, never baked in
+.env
+.env.*
+!.env.example
+
+# Git
+.git
+.gitignore
+
+# Docker files
+Dockerfile*
+*.Dockerfile
+docker-compose*
+.dockerignore
+
+# Editor / OS
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+*.swp
+
+# Tests
+coverage
+__tests__
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Logs
+*.log
+logs/
+
+# Misc
+README.md
+CHANGELOG.md

@@ -22,6 +22,8 @@ import searchRoutes from "./modules/search/search.routes";
 import redis from "./services/redis";
 import pool from "./services/db";
 
+console.log(process.env.DATABASE_URL)
+
 const fastify = Fastify({
   logger: {
     level: process.env.NODE_ENV === "production" ? "warn" : "info",
@@ -31,6 +33,7 @@ const fastify = Fastify({
         : undefined,
   },
 });
+
 
 async function bootstrap() {
   await registerPlugins(fastify);

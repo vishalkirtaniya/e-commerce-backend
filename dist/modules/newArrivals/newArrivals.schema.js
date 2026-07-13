@@ -1,33 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newArrivalsSchema = void 0;
-exports.newArrivalsSchema = {
-    schema: {
-        tags: ["Products"],
-        summary: "Get 4 most recently added products for the New Arrivals section",
-        response: {
-            200: {
-                type: "array",
-                items: {
-                    type: "object",
-                    required: ["id", "name", "price", "rating", "image"],
-                    properties: {
-                        id: { type: "string", format: "uuid" },
-                        name: { type: "string" },
-                        price: { type: "string", examples: ["$120"] },
-                        originalPrice: { type: "string", examples: ["$160"] },
-                        discount: { type: "string", examples: ["-20%"] },
-                        rating: { type: "number", examples: [4.5] },
-                        image: { type: "string" },
-                    },
-                },
-            },
-            500: {
-                type: "object",
-                properties: {
-                    error: { type: "string" },
-                },
-            },
-        },
-    },
-};
+exports.NewArrivalsQuerySchema = void 0;
+const zod_1 = require("zod");
+exports.NewArrivalsQuerySchema = zod_1.z.object({
+    limit: zod_1.z.coerce.number().int().min(1).max(20).optional().default(8),
+});
+//# sourceMappingURL=newArrivals.schema.js.map

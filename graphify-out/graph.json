@@ -16,7 +16,7 @@
       "label": "bootstrap()",
       "file_type": "code",
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/server.ts",
-      "source_location": "L34",
+      "source_location": "L35",
       "id": "server_bootstrap",
       "community": 10,
       "norm_label": "bootstrap()"
@@ -25,7 +25,7 @@
       "label": "shutdown()",
       "file_type": "code",
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/server.ts",
-      "source_location": "L61",
+      "source_location": "L63",
       "id": "server_shutdown",
       "community": 10,
       "norm_label": "shutdown()"
@@ -1777,6 +1777,24 @@
       "norm_label": "refundpayment()"
     },
     {
+      "label": "search.routes.ts",
+      "file_type": "code",
+      "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/search/search.routes.ts",
+      "source_location": "L1",
+      "id": "home_shilpa_projects_ecommerce_backend_src_modules_search_search_routes_ts",
+      "community": 0,
+      "norm_label": "search.routes.ts"
+    },
+    {
+      "label": "searchRoutes()",
+      "file_type": "code",
+      "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/search/search.routes.ts",
+      "source_location": "L19",
+      "id": "search_routes_searchroutes",
+      "community": 0,
+      "norm_label": "searchroutes()"
+    },
+    {
       "label": "index.ts",
       "file_type": "code",
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/plugins/index.ts",
@@ -1827,7 +1845,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/server.ts",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0,
       "_src": "home_shilpa_projects_ecommerce_backend_src_server_ts",
       "_tgt": "server_bootstrap",
@@ -1839,7 +1857,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/server.ts",
-      "source_location": "L61",
+      "source_location": "L63",
       "weight": 1.0,
       "_src": "home_shilpa_projects_ecommerce_backend_src_server_ts",
       "_tgt": "server_shutdown",
@@ -1989,6 +2007,18 @@
       "_tgt": "home_shilpa_projects_ecommerce_backend_src_services_db_ts",
       "source": "home_shilpa_projects_ecommerce_backend_src_services_db_ts",
       "target": "home_shilpa_projects_ecommerce_backend_src_modules_admin_promos_promos_routes_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/search/search.routes.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "home_shilpa_projects_ecommerce_backend_src_modules_search_search_routes_ts",
+      "_tgt": "home_shilpa_projects_ecommerce_backend_src_services_db_ts",
+      "source": "home_shilpa_projects_ecommerce_backend_src_services_db_ts",
+      "target": "home_shilpa_projects_ecommerce_backend_src_modules_search_search_routes_ts",
       "confidence_score": 1.0
     },
     {
@@ -3366,8 +3396,8 @@
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/admin/customers/customers.routes.ts",
       "source_location": "L10",
       "weight": 1.0,
-      "_src": "customers_routes_customerroutes",
-      "_tgt": "requirepermission_requirepermission",
+      "_src": "requirepermission_requirepermission",
+      "_tgt": "customers_routes_customerroutes",
       "source": "requirepermission_requirepermission",
       "target": "customers_routes_customerroutes"
     },
@@ -3378,8 +3408,8 @@
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/admin/analytics/analytics.routes.ts",
       "source_location": "L20",
       "weight": 1.0,
-      "_src": "analytics_routes_analyticsroutes",
-      "_tgt": "requirepermission_requirepermission",
+      "_src": "requirepermission_requirepermission",
+      "_tgt": "analytics_routes_analyticsroutes",
       "source": "requirepermission_requirepermission",
       "target": "analytics_routes_analyticsroutes"
     },
@@ -3390,8 +3420,8 @@
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/admin/promos/promos.routes.ts",
       "source_location": "L68",
       "weight": 1.0,
-      "_src": "promos_routes_promoroutes",
-      "_tgt": "requirepermission_requirepermission",
+      "_src": "requirepermission_requirepermission",
+      "_tgt": "promos_routes_promoroutes",
       "source": "requirepermission_requirepermission",
       "target": "promos_routes_promoroutes"
     },
@@ -4062,8 +4092,8 @@
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/admin/users/admin-users.controller.ts",
       "source_location": "L130",
       "weight": 1.0,
-      "_src": "admin_users_controller_reactivateadminuserhandler",
-      "_tgt": "auditlog_auditlog",
+      "_src": "auditlog_auditlog",
+      "_tgt": "admin_users_controller_reactivateadminuserhandler",
       "source": "auditlog_auditlog",
       "target": "admin_users_controller_reactivateadminuserhandler"
     },
@@ -4242,8 +4272,8 @@
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/admin/users/admin-users.controller.ts",
       "source_location": "L51",
       "weight": 1.0,
-      "_src": "admin_users_controller_getadminauditloghandler",
-      "_tgt": "admin_users_service_getadminauditlog",
+      "_src": "admin_users_service_getadminauditlog",
+      "_tgt": "admin_users_controller_getadminauditloghandler",
       "source": "admin_users_service_getadminauditlog",
       "target": "admin_users_controller_getadminauditloghandler"
     },
@@ -4254,8 +4284,8 @@
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/admin/users/admin-users.controller.ts",
       "source_location": "L38",
       "weight": 1.0,
-      "_src": "admin_users_controller_getadminroleshandler",
-      "_tgt": "admin_users_service_getallroles",
+      "_src": "admin_users_service_getallroles",
+      "_tgt": "admin_users_controller_getadminroleshandler",
       "source": "admin_users_service_getallroles",
       "target": "admin_users_controller_getadminroleshandler"
     },
@@ -4290,8 +4320,8 @@
       "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/admin/users/admin-users.controller.ts",
       "source_location": "L129",
       "weight": 1.0,
-      "_src": "admin_users_controller_reactivateadminuserhandler",
-      "_tgt": "admin_users_service_reactivateadminuser",
+      "_src": "admin_users_service_reactivateadminuser",
+      "_tgt": "admin_users_controller_reactivateadminuserhandler",
       "source": "admin_users_service_reactivateadminuser",
       "target": "admin_users_controller_reactivateadminuserhandler"
     },
@@ -5097,6 +5127,18 @@
       "_tgt": "payments_service_refundpayment",
       "source": "home_shilpa_projects_ecommerce_backend_src_modules_payments_payments_service_ts",
       "target": "payments_service_refundpayment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "/home/shilpa/projects/ecommerce-backend/src/modules/search/search.routes.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "_src": "home_shilpa_projects_ecommerce_backend_src_modules_search_search_routes_ts",
+      "_tgt": "search_routes_searchroutes",
+      "source": "home_shilpa_projects_ecommerce_backend_src_modules_search_search_routes_ts",
+      "target": "search_routes_searchroutes",
       "confidence_score": 1.0
     },
     {

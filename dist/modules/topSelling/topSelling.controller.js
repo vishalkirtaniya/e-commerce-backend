@@ -1,29 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.topSelling = topSelling;
+exports.getTopSellingHandler = getTopSellingHandler;
+const topSelling_schema_1 = require("./topSelling.schema");
 const topSelling_service_1 = require("./topSelling.service");
-async function topSelling(req, reply) {
+// ── GET /api/top-selling ──────────────────────────────────────
+async function getTopSellingHandler(request, reply) {
+    const parsed = topSelling_schema_1.TopSellingQuerySchema.safeParse(request.query);
+    if (!parsed.success) {
+        return reply
+            .status(400)
+            .send({ error: parsed.error.flatten().fieldErrors });
+    }
     try {
-        const data = await (0, topSelling_service_1.getTopSellingProducts)();
-        const products = data.map((p) => {
-            const hasDiscount = p.original_price && p.original_price > p.price;
-            const discountPercent = hasDiscount
-                ? `-${Math.round((1 - p.price / p.original_price) * 100)}%`
-                : undefined;
-            return {
-                id: p.id,
-                name: p.name,
-                price: `$${p.price}`,
-                ...(hasDiscount && { originalPrice: `$${p.original_price}` }),
-                ...(hasDiscount && { discount: discountPercent }),
-                rating: p.rating ? parseFloat(p.rating) : 0,
-                image: p.product_images?.[0]?.image_url ?? "",
-            };
-        });
-        return reply.send(products);
+        const data = await (0, topSelling_service_1.getTopSelling)(parsed.data.limit);
+        return reply.status(200).send({ data });
     }
     catch (err) {
-        req.log.error(err);
-        return reply.status(500).send({ error: "Internal server error" });
+        request.log.error(err);
+        return reply
+            .status(500)
+            .send({ error: "Failed to fetch top selling products" });
     }
 }
+//# sourceMappingURL=topSelling.controller.js.map

@@ -1,29 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newArrivals = newArrivals;
+exports.getNewArrivalsHandler = getNewArrivalsHandler;
+const newArrivals_schema_1 = require("./newArrivals.schema");
 const newArrivals_service_1 = require("./newArrivals.service");
-async function newArrivals(req, reply) {
+// ── GET /api/new-arrivals ─────────────────────────────────────
+async function getNewArrivalsHandler(request, reply) {
+    const parsed = newArrivals_schema_1.NewArrivalsQuerySchema.safeParse(request.query);
+    if (!parsed.success) {
+        return reply.status(400).send({ error: parsed.error.flatten().fieldErrors });
+    }
     try {
-        const data = await (0, newArrivals_service_1.getNewArrivals)();
-        const products = data.map((p) => {
-            const hasDiscount = p.original_price && p.original_price > p.price;
-            const discountPercent = hasDiscount
-                ? `-${Math.round((1 - p.price / p.original_price) * 100)}%`
-                : undefined;
-            return {
-                id: p.id,
-                name: p.name,
-                price: `$${p.price}`,
-                ...(hasDiscount && { originalPrice: `$${p.original_price}` }),
-                ...(hasDiscount && { discount: discountPercent }),
-                rating: p.rating ? parseFloat(p.rating) : 0,
-                image: p.product_images?.[0]?.image_url ?? "",
-            };
-        });
-        return reply.send(products);
+        const data = await (0, newArrivals_service_1.getNewArrivals)(parsed.data.limit);
+        return reply.status(200).send({ data });
     }
     catch (err) {
-        req.log.error(err);
-        return reply.status(500).send({ error: "Internal server error" });
+        request.log.error(err);
+        return reply.status(500).send({ error: 'Failed to fetch new arrivals' });
     }
 }
+//# sourceMappingURL=newArrivals.controller.js.map

@@ -1,66 +1,175 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signup = signup;
-exports.login = login;
-exports.logout = logout;
-const auth_service_1 = require("./auth.service");
-const hash_1 = require("../../utils/hash");
-const jwt_1 = require("../../utils/jwt");
-const redis_1 = require("../../services/redis");
-const crypto_1 = require("crypto");
-const jwt_2 = require("../../utils/jwt");
-async function signup(req, reply) {
-    const { name, email, password } = req.body;
-    const existing = await (0, auth_service_1.findUserByEmail)(email);
-    if (existing) {
-        return reply.status(400).send({
-            error: "User already exists"
+exports.signupHandler = signupHandler;
+exports.signinHandler = signinHandler;
+exports.refreshHandler = refreshHandler;
+exports.logoutHandler = logoutHandler;
+exports.meHandler = meHandler;
+exports.forgotPasswordHandler = forgotPasswordHandler;
+exports.verifyOtpHandler = verifyOtpHandler;
+exports.resetPasswordHandler = resetPasswordHandler;
+const auth_schema_1 = require("./auth.schema");
+const AuthService = __importStar(require("./auth.service"));
+// ── POST /api/auth/signup ─────────────────────────────────────
+async function signupHandler(request, reply) {
+    const parsed = auth_schema_1.SignupSchema.safeParse(request.body);
+    if (!parsed.success) {
+        return reply
+            .status(400)
+            .send({ error: parsed.error.flatten().fieldErrors });
+    }
+    try {
+        const result = await AuthService.signup(parsed.data);
+        return reply.status(201).send(result);
+    }
+    catch (err) {
+        return reply
+            .status(err.statusCode ?? 500)
+            .send({ error: err.message ?? "Internal server error" });
+    }
+}
+// ── POST /api/auth/signin ─────────────────────────────────────
+async function signinHandler(request, reply) {
+    const parsed = auth_schema_1.SigninSchema.safeParse(request.body);
+    if (!parsed.success) {
+        return reply
+            .status(400)
+            .send({ error: parsed.error.flatten().fieldErrors });
+    }
+    try {
+        const result = await AuthService.signin(parsed.data);
+        return reply.status(200).send(result);
+    }
+    catch (err) {
+        return reply
+            .status(err.statusCode ?? 500)
+            .send({ error: err.message ?? "Internal server error" });
+    }
+}
+// ── POST /api/auth/refresh ────────────────────────────────────
+async function refreshHandler(request, reply) {
+    const parsed = auth_schema_1.RefreshSchema.safeParse(request.body);
+    if (!parsed.success) {
+        return reply
+            .status(400)
+            .send({ error: parsed.error.flatten().fieldErrors });
+    }
+    try {
+        const result = await AuthService.refreshTokens(parsed.data.refresh_token);
+        return reply.status(200).send(result);
+    }
+    catch (err) {
+        return reply
+            .status(err.statusCode ?? 500)
+            .send({ error: err.message ?? "Internal server error" });
+    }
+}
+// ── POST /api/auth/logout ─────────────────────────────────────
+async function logoutHandler(request, reply) {
+    const user = request.user;
+    const token = request.headers.authorization.slice(7);
+    try {
+        const result = await AuthService.logout(user.userId, token);
+        return reply.status(200).send(result);
+    }
+    catch (err) {
+        return reply.status(500).send({ error: "Logout failed" });
+    }
+}
+// ── GET /api/auth/me ──────────────────────────────────────────
+async function meHandler(request, reply) {
+    // user is already attached by authenticate middleware
+    const user = request.user;
+    return reply.status(200).send({ user });
+}
+// ── POST /api/auth/forgot-password ────────────────────────────
+async function forgotPasswordHandler(request, reply) {
+    const parsed = auth_schema_1.forgotPasswordSchema.safeParse(request.body);
+    if (!parsed.success) {
+        return reply
+            .status(400)
+            .send({ error: parsed.error.flatten().fieldErrors });
+    }
+    try {
+        await AuthService.sendForgotPasswordOtp(parsed.data);
+        // Always 200 — no info leak
+        return reply.status(200).send({
+            message: "OTP sent if account exists",
         });
     }
-    const password_hash = await (0, hash_1.hashPassword)(password);
-    const user = await (0, auth_service_1.createUser)({
-        name,
-        email,
-        password_hash
-    });
-    return {
-        message: "User created",
-        user
-    };
-}
-async function login(req, reply) {
-    const { email, password } = req.body;
-    const user = await (0, auth_service_1.findUserByEmail)(email);
-    if (!user) {
-        return reply.status(401).send({
-            error: "Invalid credentials"
-        });
+    catch (err) {
+        return reply
+            .status(err.statusCode ?? 500)
+            .send({ error: err.message ?? "Internal server error" });
     }
-    const valid = await (0, hash_1.comparePassword)(password, user.password);
-    if (!valid) {
-        return reply.status(401).send({
-            error: "Invalid credentials"
-        });
-    }
-    const sessionId = (0, crypto_1.randomUUID)();
-    const token = (0, jwt_1.signToken)({
-        userId: user.id,
-        sessionId
-    });
-    await redis_1.redis.set(`session:${sessionId}`, JSON.stringify({
-        userId: user.id
-    }), "EX", 60 * 60 * 24);
-    return {
-        token
-    };
 }
-async function logout(req, reply) {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        return reply.status(401).send({ error: "Unauthorized" });
+// ── POST /api/auth/verify-otp ─────────────────────────────────
+async function verifyOtpHandler(request, reply) {
+    const parsed = auth_schema_1.verifyOtpSchema.safeParse(request.body);
+    if (!parsed.success) {
+        return reply
+            .status(400)
+            .send({ error: parsed.error.flatten().fieldErrors });
     }
-    const token = authHeader.split(" ")[1];
-    const payload = (0, jwt_2.verifyToken)(token);
-    await redis_1.redis.del(`session:${payload.sessionId}`);
-    return { message: "Logged out successfully" };
+    try {
+        await AuthService.verifyOtp(parsed.data);
+        return reply.status(200).send({ message: "OTP verified" });
+    }
+    catch (err) {
+        return reply
+            .status(err.statusCode ?? 500)
+            .send({ error: err.message ?? "Internal server error" });
+    }
 }
+// ── POST /api/auth/reset-password ─────────────────────────────
+async function resetPasswordHandler(request, reply) {
+    const parsed = auth_schema_1.resetPasswordSchema.safeParse(request.body);
+    if (!parsed.success) {
+        return reply
+            .status(400)
+            .send({ error: parsed.error.flatten().fieldErrors });
+    }
+    try {
+        await AuthService.resetPassword(parsed.data);
+        return reply.status(200).send({ message: "Password reset successfully" });
+    }
+    catch (err) {
+        return reply
+            .status(err.statusCode ?? 500)
+            .send({ error: err.message ?? "Internal server error" });
+    }
+}
+//# sourceMappingURL=auth.controller.js.map

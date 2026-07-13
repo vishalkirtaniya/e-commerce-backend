@@ -1,31 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.topSellingSchema = void 0;
-exports.topSellingSchema = {
-    schema: {
-        tags: ["Products"],
-        summary: "Get top 4 best-selling products by total quantity sold",
-        response: {
-            200: {
-                type: "array",
-                items: {
-                    type: "object",
-                    required: ["id", "name", "price", "rating", "image"],
-                    properties: {
-                        id: { type: "string", format: "uuid" },
-                        name: { type: "string" },
-                        price: { type: "string", examples: ["$212"] },
-                        originalPrice: { type: "string", examples: ["$232"] },
-                        discount: { type: "string", examples: ["-20%"] },
-                        rating: { type: "number", examples: [4.5] },
-                        image: { type: "string" },
-                    },
-                },
-            },
-            500: {
-                type: "object",
-                properties: { error: { type: "string" } },
-            },
-        },
-    },
-};
+exports.TopSellingQuerySchema = void 0;
+const zod_1 = require("zod");
+exports.TopSellingQuerySchema = zod_1.z.object({
+    limit: zod_1.z.coerce.number().int().min(1).max(20).optional().default(8),
+});
+//# sourceMappingURL=topSelling.schema.js.map

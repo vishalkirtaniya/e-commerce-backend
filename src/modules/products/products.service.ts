@@ -25,23 +25,18 @@ export async function getProducts(query: ProductsQuery) {
     params.push(category);
     where.push(`c.slug = $${paramIdx++}`);
   }
-
   if (material) {
     params.push(material);
     where.push(`p.material = $${paramIdx++}`);
   }
-
   if (min_price !== undefined) {
     params.push(min_price);
     where.push(`p.price >= $${paramIdx++}`);
   }
-
   if (max_price !== undefined) {
     params.push(max_price);
     where.push(`p.price <= $${paramIdx++}`);
   }
-
-  // Occasion filter uses a subquery join
   if (occasion) {
     params.push(occasion);
     where.push(`
@@ -78,15 +73,27 @@ export async function getProducts(query: ProductsQuery) {
       p.rating,
       p.review_count,
       p.is_customizable,
-      c.name  AS category_name,
-      c.slug  AS category_slug,
-      -- Primary image
+      c.name AS category_name,
+      c.slug AS category_slug,
+
+      -- Primary image (single string, backward-compatible)
       (
         SELECT pi.url
         FROM product_images pi
         WHERE pi.product_id = p.id AND pi.is_primary = TRUE
         LIMIT 1
       ) AS image,
+
+      -- All images ordered: primary first, then by id
+      COALESCE(
+        (
+          SELECT json_agg(pi.url ORDER BY pi.is_primary DESC, pi.id ASC)
+          FROM product_images pi
+          WHERE pi.product_id = p.id
+        ),
+        '[]'::json
+      ) AS images,
+
       -- Occasions array
       COALESCE(
         (
@@ -97,6 +104,7 @@ export async function getProducts(query: ProductsQuery) {
         ),
         '[]'::json
       ) AS occasions
+
     FROM products p
     JOIN categories c ON c.id = p.category_id
     ${whereSQL}
@@ -117,7 +125,7 @@ export async function getProducts(query: ProductsQuery) {
   // Run both in parallel
   const [dataResult, countResult] = await Promise.all([
     pool.query(dataQuery, params),
-    pool.query(countQuery, params.slice(0, params.length - 2)), // exclude limit/offset
+    pool.query(countQuery, params.slice(0, params.length - 2)),
   ]);
 
   const total = parseInt(countResult.rows[0].total, 10);
@@ -135,7 +143,6 @@ export async function getProducts(query: ProductsQuery) {
     },
   };
 }
-
 // ── GET /api/products/:slug  (product detail page) ───────────
 export async function getProductBySlug(slug: string) {
   // 1. Main product data
@@ -153,6 +160,7 @@ export async function getProductBySlug(slug: string) {
       p.rating,
       p.review_count,
       p.is_customizable,
+      p.is_customizable_with_image,
       c.name AS category_name,
       c.slug AS category_slug
     FROM products p

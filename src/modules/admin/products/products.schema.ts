@@ -20,6 +20,7 @@ export const CreateProductSchema = z.object({
     is_new_arrival: z.boolean().optional().default(false),
     is_top_selling: z.boolean().optional().default(false),
     is_customizable: z.boolean().optional().default(true),
+    is_customizable_with_image: z.boolean().optional().default(false), // ← new
     is_sold_out: z.boolean().optional().default(false),
     sizes: z.array(ProductSizeSchema).optional().default([]),
   }),
@@ -38,6 +39,7 @@ export const UpdateProductSchema = z.object({
     is_new_arrival: z.boolean().optional(),
     is_top_selling: z.boolean().optional(),
     is_customizable: z.boolean().optional(),
+    is_customizable_with_image: z.boolean().optional(), // ← new
     is_sold_out: z.boolean().optional(),
     sizes: z.array(ProductSizeSchema).optional(),
   }),
